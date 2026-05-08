@@ -12,6 +12,10 @@ import AdminStats from './AdminStats.jsx';
 import AdminExport from './AdminExport.jsx';
 import AdminSearch from './AdminSearch.jsx';
 import AdminSystem from './AdminSystem.jsx';
+import AdminInsights from './AdminInsights.jsx';
+import AdminOperations from './AdminOperations.jsx';
+import AdminAdvanced from './AdminAdvanced.jsx';
+import AdminProgram from './AdminProgram.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 
 const ROLE_LABEL = {
@@ -86,6 +90,18 @@ export default function Admin() {
           )}
           {ctx.admin.role === 'admin' && (
             <Route path="sistema" element={<AdminSystem ctx={ctx} />} />
+          )}
+          {can(ctx.admin.role, 'view_aggregated') && (
+            <Route path="avanzado" element={<AdminAdvanced />} />
+          )}
+          {can(ctx.admin.role, 'view_aggregated') && (
+            <Route path="insights" element={<AdminInsights />} />
+          )}
+          {ctx.admin.role === 'admin' && (
+            <Route path="operacion" element={<AdminOperations ctx={ctx} />} />
+          )}
+          {can(ctx.admin.role, 'manage_content') && (
+            <Route path="programa" element={<AdminProgram ctx={ctx} />} />
           )}
         </Routes>
       </main>
@@ -229,11 +245,15 @@ function AdminSidebar({ ctx }) {
       <nav className="admin-nav">
         <NavLink to="" end>📊 Dashboard</NavLink>
         {can(r, 'view_aggregated') && <NavLink to="estadisticas">📈 Estadísticas</NavLink>}
+        {can(r, 'view_aggregated') && <NavLink to="avanzado">🧠 Análisis avanzado</NavLink>}
+        {can(r, 'view_aggregated') && <NavLink to="insights">✨ Pum-AI Insights</NavLink>}
         {can(r, 'view_detail') && <NavLink to="sesiones">🔍 Sesiones</NavLink>}
         {can(r, 'view_detail') && <NavLink to="buscar">🔎 Buscar por código</NavLink>}
         {can(r, 'manage_content') && <NavLink to="contenido">📝 Contenido</NavLink>}
+        {can(r, 'manage_content') && <NavLink to="programa">🌱 Programa</NavLink>}
         {can(r, 'view_aggregated') && <NavLink to="exportar">⬇ Exportar</NavLink>}
         {r === 'admin' && <NavLink to="sistema">⚙ Sistema</NavLink>}
+        {r === 'admin' && <NavLink to="operacion">🔒 Operación</NavLink>}
         {can(r, 'manage_users') && <NavLink to="usuarios">👥 Usuarios admin</NavLink>}
         {can(r, 'manage_users') && <NavLink to="auditoria">🧾 Auditoría</NavLink>}
         <NavLink to="perfil">👤 Mi perfil</NavLink>

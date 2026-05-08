@@ -23,6 +23,7 @@ import Trees       from './pages/Trees.jsx';
 import Buddy       from './pages/Buddy.jsx';
 import Adventure   from './pages/Adventure.jsx';
 import Calendar    from './pages/Calendar.jsx';
+import TeachersKit from './pages/TeachersKit.jsx';
 import CrisisFAB   from './components/CrisisFAB.jsx';
 
 export default function App() {
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/buddy"       element={<Buddy />} />
           <Route path="/aventura"    element={<Adventure />} />
           <Route path="/calendario"  element={<Calendar />} />
+          <Route path="/docentes"    element={<TeachersKit />} />
 
           {/* Login antes de la ruta protegida; usar rutas anidadas para que Admin
               pueda definir sus subrutas (usuarios, sesiones). */}

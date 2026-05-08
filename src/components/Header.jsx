@@ -30,6 +30,7 @@ export default function Header() {
           <NavLink to="/mapa">Mapa</NavLink>
           <NavLink to="/apoyo">Apoyo</NavLink>
           <NavLink to="/emociones">Emociones</NavLink>
+          <NavLink to="/docentes">Docentes</NavLink>
           {loggedIn ? (
             <>
               <NavLink to="/companion">🤝 Pum-AI</NavLink>
