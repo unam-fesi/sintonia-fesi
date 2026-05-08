@@ -122,6 +122,12 @@ function SuspiciousIPs() {
     load();
   }
 
+  async function clearLogs(ipHash) {
+    if (!confirm('¿Limpiar el historial de esta IP? Resetea el contador de rate limit (útil para testing).')) return;
+    await supabase.from('ip_log').delete().eq('ip_hash', ipHash);
+    load();
+  }
+
   return (
     <section className="panel">
       <p className="note">IPs (hasheadas) que crearon más de 5 códigos anónimos en las últimas 24h.</p>
@@ -141,14 +147,21 @@ function SuspiciousIPs() {
                   <td><strong>{r.distinct_codes}</strong></td>
                   <td><small>{(r.endpoints || []).join(', ')}</small></td>
                   <td>{new Date(r.last_at).toLocaleString('es-MX')}</td>
-                  <td><button className="icon-btn danger" onClick={() => block(r.ip_hash)}>🚫 Bloquear</button></td>
+                  <td style={{whiteSpace:'nowrap'}}>
+                    <button className="icon-btn" onClick={() => clearLogs(r.ip_hash)} title="Borra logs y resetea rate limit">🧹 Limpiar</button>
+                    {' '}
+                    <button className="icon-btn danger" onClick={() => block(r.ip_hash)}>🚫 Bloquear</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      <style>{`.icon-btn.danger { color: #93362A; border: 1px solid var(--c-coral-500); background:transparent; padding: 6px 10px; border-radius: 8px; cursor: pointer; }`}</style>
+      <style>{`
+        .icon-btn { background:transparent; border: 1px solid var(--c-borde); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+        .icon-btn.danger { color: #93362A; border-color: var(--c-coral-500); }
+      `}</style>
     </section>
   );
 }
@@ -156,6 +169,8 @@ function SuspiciousIPs() {
 function BlockedIPs() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
+  const [resetMsg, setResetMsg] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -166,9 +181,31 @@ function BlockedIPs() {
   useEffect(() => { load(); }, []);
 
   async function unblock(ipHash) {
-    if (!confirm('¿Desbloquear esta IP?')) return;
+    if (!confirm('¿Desbloquear esta IP? También limpiará su historial de logs (para evitar re-bloqueo automático).')) return;
+    // 1) Quitar del blocklist
     await supabase.from('ip_blocklist').delete().eq('ip_hash', ipHash);
+    // 2) Limpiar SUS logs en ip_log para que el contador de rate limit se reinicie
+    await supabase.from('ip_log').delete().eq('ip_hash', ipHash);
     load();
+  }
+
+  async function resetAllRecent() {
+    if (!confirm('⚠️ MODO TESTING\n\n¿Borrar TODOS los logs de IP de las últimas 24h y desbloquear TODAS las IPs?\n\nEsto resetea los rate limits de toda la plataforma. Útil cuando estás probando con tu propia conexión y quieres seguir registrando códigos.')) return;
+    setResetting(true); setResetMsg(null);
+    try {
+      const since = new Date(Date.now() - 24*3600*1000).toISOString();
+      const [a, b] = await Promise.all([
+        supabase.from('ip_log').delete().gte('created_at', since),
+        supabase.from('ip_blocklist').delete().gte('blocked_at', since),
+      ]);
+      if (a.error || b.error) throw new Error(a.error?.message || b.error?.message);
+      setResetMsg('✅ Logs de IP y blocklist de las últimas 24h limpiados. Ya puedes volver a registrar.');
+      load();
+    } catch (e) {
+      setResetMsg('❌ ' + (e.message || 'Error al resetear'));
+    } finally {
+      setResetting(false);
+    }
   }
 
   return (
@@ -185,14 +222,38 @@ function BlockedIPs() {
                   <td><code style={{fontSize:'0.74rem'}}>{r.ip_hash.slice(0, 16)}…</code></td>
                   <td><small>{r.reason}</small></td>
                   <td>{new Date(r.blocked_at).toLocaleString('es-MX')}</td>
-                  <td><button className="icon-btn" onClick={() => unblock(r.ip_hash)}>✓ Desbloquear</button></td>
+                  <td><button className="icon-btn" onClick={() => unblock(r.ip_hash)}>✓ Desbloquear y limpiar logs</button></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      <style>{`.icon-btn { background:transparent; border: 1px solid var(--c-borde); padding: 6px 10px; border-radius: 8px; cursor: pointer; }`}</style>
+
+      {/* ===== Modo testing — botón bestia para devs ===== */}
+      <div className="testing-box mt-4">
+        <h3>🧪 Modo testing — resetear rate limits</h3>
+        <p className="note">
+          Cuando estás probando registros con tu propia IP y te auto-bloqueas, este botón limpia
+          todos los logs y desbloqueos de las últimas 24h. <strong>No usar en producción real.</strong>
+        </p>
+        <button className="btn btn-ghost" onClick={resetAllRecent} disabled={resetting}>
+          {resetting ? 'Reseteando…' : '🧹 Resetear rate limits de las últimas 24h'}
+        </button>
+        {resetMsg && <p className="note mt-2"><strong>{resetMsg}</strong></p>}
+      </div>
+
+      <style>{`
+        .icon-btn { background:transparent; border: 1px solid var(--c-borde); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+        .testing-box {
+          margin-top: 20px;
+          padding: 16px 18px;
+          background: var(--c-oro-100);
+          border: 1px dashed var(--c-oro-600);
+          border-radius: 12px;
+        }
+        .testing-box h3 { margin: 0 0 6px; font-size: 1rem; color: #7B5E14; }
+      `}</style>
     </section>
   );
 }
