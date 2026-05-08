@@ -10,6 +10,7 @@ import Resources  from './pages/Resources.jsx';
 import Privacy    from './pages/Privacy.jsx';
 import Admin      from './pages/Admin.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
+import MyHistory  from './pages/MyHistory.jsx';
 
 export default function App() {
   const location = useLocation();
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/resultado" element={<Results />} />
           <Route path="/recursos" element={<Resources />} />
           <Route path="/privacidad" element={<Privacy />} />
+          <Route path="/mi-historia" element={<MyHistory />} />
 
           {/* Login antes de la ruta protegida; usar rutas anidadas para que Admin
               pueda definir sus subrutas (usuarios, sesiones). */}

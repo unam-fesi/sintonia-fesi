@@ -8,12 +8,32 @@ import { logAudit } from '../services/auditService.js';
 import { DIMENSIONS } from '../data/fallbackQuestions.js';
 import { RESOURCE_TYPES } from '../data/fallbackResources.js';
 import PumAISuggester from '../components/PumAISuggester.jsx';
+import PumAIRecSuggester from '../components/PumAIRecSuggester.jsx';
 
 const TABS = [
   { id: 'questions',       label: 'Preguntas' },
   { id: 'recommendations', label: 'Recomendaciones' },
   { id: 'resources',       label: 'Recursos' },
 ];
+
+function SortHead({ k, sortBy, onSort, children }) {
+  const active = sortBy.key === k;
+  const arrow = active ? (sortBy.dir === 'asc' ? '▲' : '▼') : '↕';
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(k)}
+      style={{
+        background: 'transparent', border: 0, cursor: 'pointer',
+        font: 'inherit', color: 'inherit', padding: 0,
+        display: 'inline-flex', gap: 4, alignItems: 'center',
+        opacity: active ? 1 : 0.7,
+      }}
+    >
+      {children} <span style={{fontSize: '0.7em'}}>{arrow}</span>
+    </button>
+  );
+}
 
 export default function AdminContent({ ctx }) {
   const [tab, setTab] = useState('questions');
@@ -112,20 +132,31 @@ export default function AdminContent({ ctx }) {
 // ============================================================
 function QuestionsEditor({ ctx }) {
   const [items, setItems] = useState([]);
-  const [editing, setEditing] = useState(null); // id en edición o 'new'
+  const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState({});
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState({ key: 'sort_order', dir: 'asc' });
 
   async function load() {
     setLoading(true);
-    const { data } = await supabase
-      .from('questions')
-      .select('*')
-      .order('sort_order');
+    const { data } = await supabase.from('questions').select('*');
     setItems(data || []);
     setLoading(false);
   }
   useEffect(() => { load(); }, []);
+
+  function toggleSort(key) {
+    setSortBy(s => s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' });
+  }
+
+  const sorted = [...items].sort((a, b) => {
+    const A = a[sortBy.key]; const B = b[sortBy.key];
+    if (A === B) return 0;
+    if (A == null) return 1;
+    if (B == null) return -1;
+    const cmp = typeof A === 'number' ? A - B : String(A).localeCompare(String(B));
+    return sortBy.dir === 'asc' ? cmp : -cmp;
+  });
 
   function startNew() {
     const order = items.length ? Math.max(...items.map(q => q.sort_order)) + 1 : 1;
@@ -211,16 +242,16 @@ function QuestionsEditor({ ctx }) {
         <table className="editor-table">
           <thead>
             <tr>
-              <th style={{width:48}}>#</th>
-              <th>Texto</th>
-              <th style={{width:160}}>Dimensión</th>
-              <th style={{width:80}}>Inversa</th>
-              <th style={{width:80}}>Activa</th>
+              <th style={{width:48}}><SortHead k="sort_order" sortBy={sortBy} onSort={toggleSort}>#</SortHead></th>
+              <th><SortHead k="question_text" sortBy={sortBy} onSort={toggleSort}>Texto</SortHead></th>
+              <th style={{width:160}}><SortHead k="dimension" sortBy={sortBy} onSort={toggleSort}>Dimensión</SortHead></th>
+              <th style={{width:80}}><SortHead k="is_reverse_scored" sortBy={sortBy} onSort={toggleSort}>Inversa</SortHead></th>
+              <th style={{width:80}}><SortHead k="active" sortBy={sortBy} onSort={toggleSort}>Activa</SortHead></th>
               <th style={{width:140}}></th>
             </tr>
           </thead>
           <tbody>
-            {items.map(q => (
+            {sorted.map(q => (
               editing === q.id ? (
                 <DraftRow key={q.id} draft={draft} setDraft={setDraft} onSave={save} onCancel={() => { setEditing(null); setDraft({}); }} />
               ) : (
@@ -301,6 +332,16 @@ function RecommendationsEditor({ ctx }) {
     setDraft({ dimension: DIMENSIONS[0].id, level: 'bajo', title: '', description: '', active: true });
   }
   function startEdit(r) { setEditing(r.id); setDraft({...r}); }
+  function applyRecSuggestion(s) {
+    setEditing('new');
+    setDraft({
+      dimension: s.dimension || DIMENSIONS[0].id,
+      level:     s.level || 'moderado',
+      title:     s.title,
+      description: s.description,
+      active: true,
+    });
+  }
 
   async function save() {
     if (!draft.title?.trim()) return;
@@ -326,9 +367,12 @@ function RecommendationsEditor({ ctx }) {
 
   return (
     <div className="panel">
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
         <h2>Catálogo de recomendaciones ({items.length})</h2>
-        {editing !== 'new' && <button className="btn btn-primary btn-sm" onClick={startNew}>＋ Nueva</button>}
+        <div style={{display:'flex',gap:8}}>
+          <PumAIRecSuggester onUse={applyRecSuggestion} />
+          {editing !== 'new' && <button className="btn btn-primary btn-sm" onClick={startNew}>＋ Nueva</button>}
+        </div>
       </div>
 
       {editing === 'new' && <RecDraft draft={draft} setDraft={setDraft} onSave={save} onCancel={() => { setEditing(null); setDraft({}); }} />}

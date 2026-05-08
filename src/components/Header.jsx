@@ -22,6 +22,7 @@ export default function Header() {
         <nav className="nav" aria-label="Navegación principal">
           <NavLink to="/" end>Inicio</NavLink>
           <NavLink to="/recursos">Recursos</NavLink>
+          <NavLink to="/mi-historia">Mi historia</NavLink>
           <NavLink to="/privacidad">Privacidad</NavLink>
           <Link to="/consentimiento" className="btn btn-primary btn-sm nav-cta">
             Iniciar orientación
