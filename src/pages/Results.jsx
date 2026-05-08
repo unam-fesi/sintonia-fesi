@@ -48,10 +48,22 @@ export default function Results() {
     navigator.clipboard?.writeText(lines).catch(() => {});
   }
 
+  const aiSource = result.ai?.source; // 'gemini' | 'fallback' | undefined
+
   return (
     <section className="section">
       <div className="container" style={{maxWidth: 1000}}>
         <ResultCard result={result} />
+
+        {aiSource && (
+          <div className={`source-badge source-${aiSource}`}>
+            {aiSource === 'gemini' ? (
+              <>✨ Orientación personalizada generada con IA (Gemini)</>
+            ) : (
+              <>📋 Orientación generada localmente desde el catálogo base</>
+            )}
+          </div>
+        )}
 
         <SafetyNotice>
           {safetyNote || (
@@ -131,6 +143,26 @@ export default function Results() {
       </div>
 
       <style>{`
+        .source-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: var(--r-pill);
+          font-size: 0.88rem;
+          font-weight: 600;
+          margin: 16px 0;
+        }
+        .source-gemini {
+          background: linear-gradient(135deg, var(--c-oro-100), var(--c-salvia-100));
+          color: var(--c-azul-800);
+          border: 1px solid var(--c-oro-600);
+        }
+        .source-fallback {
+          background: var(--c-azul-100);
+          color: var(--c-azul-800);
+          border: 1px solid var(--c-borde);
+        }
         .results-grid {
           display: grid;
           grid-template-columns: 1.4fr 1fr;
