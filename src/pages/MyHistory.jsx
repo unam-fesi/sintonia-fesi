@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabaseClient.js';
 import SafetyNotice from '../components/SafetyNotice.jsx';
+import { setStudent, clearStudent } from '../hooks/useStudent.js';
 
 export default function MyHistory() {
   const [step, setStep] = useState('login');     // login | history | register
@@ -27,6 +28,7 @@ export default function MyHistory() {
       if (hist?.error) throw new Error(hist.error);
 
       setData(hist);
+      setStudent({ code, password: password || null });
       setStep('history');
     } catch (e) {
       setErr(e.message || 'Error de inicio de sesión');
@@ -46,6 +48,7 @@ export default function MyHistory() {
       if (r?.error) throw new Error(r.error);
 
       setCode(codeNew);
+      setStudent({ code: codeNew, password: password || null });
       setData({ created: codeNew });
       setStep('registered');
     } catch (e) {
@@ -55,7 +58,7 @@ export default function MyHistory() {
     }
   }
 
-  if (step === 'history' && data) return <HistoryView data={data} code={code} onLogout={() => { setStep('login'); setData(null); setCode(''); setPassword(''); }} />;
+  if (step === 'history' && data) return <HistoryView data={data} code={code} onLogout={() => { clearStudent(); setStep('login'); setData(null); setCode(''); setPassword(''); }} />;
   if (step === 'registered') return <RegisteredOk code={code} />;
   if (step === 'register') return <RegisterForm onRegister={register} onCancel={() => setStep('login')} loading={loading} err={err} />;
 

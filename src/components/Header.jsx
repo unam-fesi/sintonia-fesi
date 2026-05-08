@@ -1,7 +1,11 @@
 import { NavLink, Link } from 'react-router-dom';
+import { useStudent } from '../hooks/useStudent.js';
 import './Header.css';
 
 export default function Header() {
+  const { student } = useStudent();
+  const loggedIn = !!student?.code;
+
   return (
     <header className="site-header">
       <div className="container topbar">
@@ -22,7 +26,17 @@ export default function Header() {
         <nav className="nav" aria-label="Navegación principal">
           <NavLink to="/" end>Inicio</NavLink>
           <NavLink to="/recursos">Recursos</NavLink>
-          <NavLink to="/mi-historia">Mi historia</NavLink>
+          <NavLink to="/apoyo">Apoyo</NavLink>
+          {loggedIn ? (
+            <>
+              <NavLink to="/check-in">Check-in</NavLink>
+              <NavLink to="/diario">Diario</NavLink>
+              <NavLink to="/ruta">Mi ruta</NavLink>
+              <NavLink to="/mi-historia">Mi historia</NavLink>
+            </>
+          ) : (
+            <NavLink to="/mi-historia">Mi historia</NavLink>
+          )}
           <NavLink to="/privacidad">Privacidad</NavLink>
           <Link to="/consentimiento" className="btn btn-primary btn-sm nav-cta">
             Iniciar orientación

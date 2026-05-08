@@ -11,6 +11,10 @@ import Privacy    from './pages/Privacy.jsx';
 import Admin      from './pages/Admin.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import MyHistory  from './pages/MyHistory.jsx';
+import CheckIn    from './pages/CheckIn.jsx';
+import Journal    from './pages/Journal.jsx';
+import Support    from './pages/Support.jsx';
+import WellnessRoute from './pages/WellnessRoute.jsx';
 
 export default function App() {
   const location = useLocation();
@@ -30,6 +34,10 @@ export default function App() {
           <Route path="/recursos" element={<Resources />} />
           <Route path="/privacidad" element={<Privacy />} />
           <Route path="/mi-historia" element={<MyHistory />} />
+          <Route path="/check-in"    element={<CheckIn />} />
+          <Route path="/diario"      element={<Journal />} />
+          <Route path="/apoyo"       element={<Support />} />
+          <Route path="/ruta"        element={<WellnessRoute />} />
 
           {/* Login antes de la ruta protegida; usar rutas anidadas para que Admin
               pueda definir sus subrutas (usuarios, sesiones). */}

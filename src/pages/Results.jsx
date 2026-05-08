@@ -54,6 +54,22 @@ export default function Results() {
       <div className="container" style={{maxWidth: 1000}}>
         <ResultCard result={result} />
 
+        {result.general_level === 'prioritario' && (
+          <div className="crisis-banner">
+            <strong>📞 Tus respuestas sugieren acercarte a apoyo profesional.</strong>
+            <p>Hay servicios universitarios y la <strong>Línea de la Vida 800 290 0024</strong> disponibles 24/7.</p>
+            <Link to="/apoyo" className="btn btn-coral btn-sm">Ver opciones de apoyo →</Link>
+          </div>
+        )}
+
+        <div className="route-cta mt-3">
+          <div>
+            <strong>✨ Crea tu ruta de bienestar</strong>
+            <small>Pum-AI te puede generar un plan diario de 7 o 14 días personalizado a tu resultado.</small>
+          </div>
+          <Link to="/ruta" className="btn btn-gold">Comenzar mi ruta →</Link>
+        </div>
+
         <SafetyNotice>
           {safetyNote || (
             <>
@@ -134,6 +150,30 @@ export default function Results() {
       </div>
 
       <style>{`
+        .crisis-banner {
+          background: linear-gradient(135deg, var(--c-coral-100), #FFF6F2);
+          border: 2px solid var(--c-coral-500);
+          border-radius: var(--r-md);
+          padding: 18px 22px;
+          margin-top: 16px;
+          display: grid; grid-template-columns: 1fr auto;
+          gap: 14px; align-items: center;
+        }
+        .crisis-banner strong { color: #93362A; display: block; font-size: 1.05rem; }
+        .crisis-banner p { color: #5C2018; margin: 4px 0 0; font-size: 0.92rem; }
+        .route-cta {
+          background: linear-gradient(135deg, var(--c-oro-100), var(--c-salvia-100));
+          border: 1px solid var(--c-oro-600);
+          border-radius: var(--r-md);
+          padding: 16px 20px;
+          display: grid; grid-template-columns: 1fr auto;
+          gap: 14px; align-items: center;
+        }
+        .route-cta strong { color: var(--c-azul-800); }
+        .route-cta small { display: block; color: var(--c-texto-soft); font-size: 0.88rem; margin-top: 2px; }
+        @media (max-width: 640px) {
+          .crisis-banner, .route-cta { grid-template-columns: 1fr; }
+        }
         .results-grid {
           display: grid;
           grid-template-columns: 1.4fr 1fr;
