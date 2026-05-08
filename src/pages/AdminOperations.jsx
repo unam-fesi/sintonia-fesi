@@ -173,7 +173,7 @@ function BlockedIPs() {
 
   return (
     <section className="panel">
-      <p className="note">IPs bloqueadas para nuevas operaciones públicas (registro/chat). Auto-bloqueo después de >5 registros en 24h.</p>
+      <p className="note">IPs bloqueadas para nuevas operaciones públicas (registro/chat). Auto-bloqueo después de más de 5 registros en 24h.</p>
       {loading ? <div className="spinner" style={{margin:'24px auto'}} /> :
        rows.length === 0 ? <p className="note text-center">Ninguna IP bloqueada. 🟢</p> : (
         <div className="table-wrap mt-2">
