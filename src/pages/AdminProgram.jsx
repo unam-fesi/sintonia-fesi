@@ -13,6 +13,7 @@ const TABS = [
   { id: 'hunts',     label: '🗺 Treasure Hunts' },
   { id: 'library',   label: '📚 Biblioteca' },
   { id: 'specialists', label: '🩺 Especialistas' },
+  { id: 'blocks',    label: '📄 Bloques de página' },
 ];
 
 export default function AdminProgram({ ctx }) {
@@ -39,6 +40,7 @@ export default function AdminProgram({ ctx }) {
         {tab === 'hunts'       && <HuntsAdmin ctx={ctx} />}
         {tab === 'library'     && <LibraryAdmin ctx={ctx} />}
         {tab === 'specialists' && <SpecialistsAdmin ctx={ctx} />}
+        {tab === 'blocks'      && <BlocksAdmin ctx={ctx} />}
       </div>
 
       <style>{`
@@ -393,6 +395,168 @@ function HuntEditor({ ctx, hunt, onClose }) {
         .icon-btn { background: transparent; border: 1px solid var(--c-borde); padding: 4px 8px; border-radius: 6px; cursor: pointer; }
       `}</style>
     </div>
+  );
+}
+
+// =============================================================
+// BLOCKS — Bloques de contenido editables (apoyo, docentes, etc.)
+// =============================================================
+function BlocksAdmin({ ctx }) {
+  const [items, setItems] = useState([]);
+  const [editing, setEditing] = useState(null);
+  const [draft, setDraft] = useState({});
+  const [pageFilter, setPageFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase.from('content_blocks').select('*').order('page').order('order_idx');
+    setItems(data || []);
+    setLoading(false);
+  }
+  useEffect(() => { load(); }, []);
+
+  function startNew() {
+    setEditing('new');
+    setDraft({ page: 'support', section_key: '', title: '', body: '', list_items: [], emoji: '', order_idx: (items.length||0)+1, active: true });
+  }
+  function startEdit(b) {
+    setEditing(b.id);
+    setDraft({ ...b, list_items: Array.isArray(b.list_items) ? b.list_items : [] });
+  }
+
+  async function save() {
+    const payload = {
+      ...draft,
+      updated_at: new Date().toISOString(),
+      updated_by: ctx.admin.id,
+      list_items: draft.list_items?.length ? draft.list_items : null,
+    };
+    if (editing === 'new') {
+      const { data, error } = await supabase.from('content_blocks').insert(payload).select().single();
+      if (error) return alert(error.message);
+      await logAudit({ ctx, action:'create', entity:'content_blocks', entity_id:data.id, after_data:data });
+    } else {
+      const before = items.find(i => i.id === editing);
+      const { error } = await supabase.from('content_blocks').update(payload).eq('id', editing);
+      if (error) return alert(error.message);
+      await logAudit({ ctx, action:'update', entity:'content_blocks', entity_id:editing, before_data:before, after_data:payload });
+    }
+    setEditing(null); setDraft({}); load();
+  }
+
+  async function remove(b) {
+    if (!confirm(`¿Eliminar bloque "${b.title}"?`)) return;
+    await supabase.from('content_blocks').delete().eq('id', b.id);
+    await logAudit({ ctx, action:'delete', entity:'content_blocks', entity_id:b.id, before_data:b });
+    load();
+  }
+
+  function addBullet() {
+    setDraft(d => ({...d, list_items: [...(d.list_items||[]), '']}));
+  }
+  function updateBullet(i, val) {
+    setDraft(d => ({...d, list_items: d.list_items.map((b, idx) => idx === i ? val : b)}));
+  }
+  function removeBullet(i) {
+    setDraft(d => ({...d, list_items: d.list_items.filter((_, idx) => idx !== i)}));
+  }
+
+  const visible = pageFilter === 'all' ? items : items.filter(b => b.page === pageFilter);
+
+  if (loading) return <div className="spinner" style={{margin:'24px auto'}} />;
+
+  return (
+    <section className="panel">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+        <h2>Bloques de contenido ({items.length})</h2>
+        <div style={{display:'flex',gap:8}}>
+          <select value={pageFilter} onChange={e => setPageFilter(e.target.value)}>
+            <option value="all">Todas las páginas</option>
+            <option value="support">Apoyo (/apoyo)</option>
+            <option value="teachers">Docentes (/admin/docentes)</option>
+            <option value="home">Inicio</option>
+          </select>
+          <button className="btn btn-primary btn-sm" onClick={startNew}>＋ Nuevo bloque</button>
+        </div>
+      </div>
+
+      <p className="note mt-2">
+        Los bloques aparecen en las páginas públicas correspondientes ordenados por <code>order_idx</code>.
+        Soporta <code>**negritas**</code> en items de lista.
+      </p>
+
+      {(editing === 'new' || editing) && (
+        <div className="edit-area mt-3">
+          <div className="grid-form">
+            <div className="field">
+              <label>Página</label>
+              <select value={draft.page} onChange={e=>setDraft({...draft, page:e.target.value})}>
+                <option value="support">Apoyo (/apoyo)</option>
+                <option value="teachers">Docentes (/admin/docentes)</option>
+                <option value="home">Inicio</option>
+              </select>
+            </div>
+            <div className="field"><label>Section key (slug)</label><input value={draft.section_key||''} onChange={e=>setDraft({...draft, section_key:e.target.value.replace(/\s+/g,'_').toLowerCase()})} placeholder="ej. alertas" /></div>
+            <div className="field"><label>Emoji</label><input value={draft.emoji||''} onChange={e=>setDraft({...draft, emoji:e.target.value})} placeholder="🎯" /></div>
+            <div className="field"><label>Orden</label><input type="number" value={draft.order_idx||0} onChange={e=>setDraft({...draft, order_idx:Number(e.target.value)})} /></div>
+            <div className="field" style={{gridColumn:'1/-1'}}><label>Título</label><input value={draft.title||''} onChange={e=>setDraft({...draft, title:e.target.value})} /></div>
+            <div className="field" style={{gridColumn:'1/-1'}}><label>Texto introductorio (opcional)</label><textarea rows={2} value={draft.body||''} onChange={e=>setDraft({...draft, body:e.target.value})} /></div>
+          </div>
+
+          <div className="field" style={{marginTop:12}}>
+            <label>Items de lista (bullets)</label>
+            {(draft.list_items || []).map((b, i) => (
+              <div key={i} style={{display:'flex',gap:6,marginBottom:6}}>
+                <input value={b} onChange={e => updateBullet(i, e.target.value)} placeholder={`Item ${i+1}`} />
+                <button className="btn btn-ghost btn-sm" onClick={() => removeBullet(i)} type="button">✕</button>
+              </div>
+            ))}
+            <button className="btn btn-ghost btn-sm" onClick={addBullet} type="button">＋ Agregar item</button>
+          </div>
+
+          <div className="field" style={{marginTop:12}}>
+            <label><input type="checkbox" checked={!!draft.active} onChange={e=>setDraft({...draft, active:e.target.checked})} /> Activo</label>
+          </div>
+
+          <div style={{display:'flex',gap:8,marginTop:10}}>
+            <button className="btn btn-primary btn-sm" onClick={save}>✓ Guardar</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => { setEditing(null); setDraft({}); }}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      <div className="table-wrap mt-3">
+        <table className="admin-table">
+          <thead><tr><th>Página</th><th>Section</th><th>Título</th><th>Items</th><th>Orden</th><th>Activo</th><th></th></tr></thead>
+          <tbody>
+            {visible.map(b => (
+              <tr key={b.id}>
+                <td><code>{b.page}</code></td>
+                <td><code>{b.section_key}</code></td>
+                <td>{b.emoji} {b.title}</td>
+                <td>{Array.isArray(b.list_items) ? b.list_items.length : 0}</td>
+                <td>{b.order_idx}</td>
+                <td>{b.active ? '✅' : '⏸'}</td>
+                <td className="actions-cell">
+                  <button className="icon-btn" onClick={() => startEdit(b)}>✎</button>
+                  <button className="icon-btn danger" onClick={() => remove(b)}>🗑</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <style>{`
+        .edit-area { background: var(--c-azul-100); padding: 14px; border-radius: 12px; }
+        .actions-cell { display: flex; gap: 4px; }
+        .icon-btn { background: transparent; border: 1px solid var(--c-borde); padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+        .icon-btn.danger { color: #93362A; border-color: var(--c-coral-500); }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 720px) { .grid-form { grid-template-columns: 1fr; } }
+      `}</style>
+    </section>
   );
 }
 

@@ -16,6 +16,7 @@ import AdminInsights from './AdminInsights.jsx';
 import AdminOperations from './AdminOperations.jsx';
 import AdminAdvanced from './AdminAdvanced.jsx';
 import AdminProgram from './AdminProgram.jsx';
+import TeachersKit from './TeachersKit.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 
 const ROLE_LABEL = {
@@ -103,6 +104,7 @@ export default function Admin() {
           {can(ctx.admin.role, 'manage_content') && (
             <Route path="programa" element={<AdminProgram ctx={ctx} />} />
           )}
+          <Route path="docentes" element={<TeachersKit />} />
         </Routes>
       </main>
 
@@ -256,6 +258,7 @@ function AdminSidebar({ ctx }) {
         {r === 'admin' && <NavLink to="operacion">🔒 Operación</NavLink>}
         {can(r, 'manage_users') && <NavLink to="usuarios">👥 Usuarios admin</NavLink>}
         {can(r, 'manage_users') && <NavLink to="auditoria">🧾 Auditoría</NavLink>}
+        <NavLink to="docentes">📚 Kit docente</NavLink>
         <NavLink to="perfil">👤 Mi perfil</NavLink>
       </nav>
 

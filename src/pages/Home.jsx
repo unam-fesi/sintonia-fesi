@@ -54,7 +54,83 @@ export default function Home() {
               </InfoCard>
             ))}
           </div>
+
+          <div className="continuity-card">
+            <div className="continuity-icon" aria-hidden="true">🔁</div>
+            <div>
+              <span className="tag sage">¿Quieres seguir cuidándote?</span>
+              <h3 className="mt-2">Tu código anónimo te abre un rincón propio</h3>
+              <p>
+                Si guardas tu código (ej. <code>SIN-XXX-####</code>) puedes regresar
+                cuando quieras y obtener acceso a:
+              </p>
+              <ul className="continuity-list">
+                <li>📝 <strong>Check-in semanal</strong> de 30 segundos</li>
+                <li>📔 <strong>Diario emocional</strong> rápido (1 línea/día)</li>
+                <li>🛤 <strong>Ruta de bienestar</strong> de 7 o 14 días personalizada</li>
+                <li>🤝 <strong>Pum-AI acompañante</strong> para conversar cuando lo necesites</li>
+                <li>📚 <strong>Biblioteca</strong> de respiraciones, sonidos y videos</li>
+                <li>🗺 <strong>Aventura</strong> con pistas en el campus</li>
+                <li>🌳 <strong>Adopta un árbol</strong> y cuídalo</li>
+                <li>🫂 <strong>Buddy anónimo</strong> para conectar con otra persona</li>
+                <li>📅 <strong>Calendario</strong> de eventos universitarios</li>
+                <li>📊 <strong>Tu evolución</strong> a lo largo del tiempo</li>
+              </ul>
+              <p className="note">
+                Sigue siendo <strong>100% anónimo</strong>: solo tu código y, si quieres, una contraseña.
+                Nada de nombre, correo ni datos personales.
+              </p>
+              <div className="continuity-actions">
+                <Link to="/mi-historia" className="btn btn-gold">Crear mi código anónimo</Link>
+                <Link to="/consentimiento" className="btn btn-ghost">Solo hacer el test</Link>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <style>{`
+          .continuity-card {
+            background: linear-gradient(135deg, var(--c-azul-100), var(--c-salvia-100));
+            border: 1px solid rgba(143,184,160,0.4);
+            border-radius: var(--r-xl);
+            padding: 32px;
+            margin-top: 28px;
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 24px;
+            align-items: start;
+          }
+          .continuity-icon {
+            width: 72px; height: 72px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--c-oro-600), var(--c-oro-400));
+            display: grid; place-items: center;
+            font-size: 2rem;
+          }
+          .continuity-card h3 {
+            font-size: 1.4rem;
+            color: var(--c-azul-800);
+          }
+          .continuity-list {
+            list-style: none;
+            padding: 0;
+            margin: 14px 0 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 6px 16px;
+          }
+          .continuity-list li {
+            font-size: 0.94rem;
+            color: var(--c-texto);
+          }
+          .continuity-actions {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;
+          }
+          @media (max-width: 720px) {
+            .continuity-card { grid-template-columns: 1fr; padding: 22px; }
+            .continuity-icon { width: 60px; height: 60px; font-size: 1.6rem; }
+          }
+        `}</style>
       </section>
 
       <section className="section">

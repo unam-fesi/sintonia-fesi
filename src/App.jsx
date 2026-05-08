@@ -26,7 +26,6 @@ const Trees         = lazy(() => import('./pages/Trees.jsx'));
 const Buddy         = lazy(() => import('./pages/Buddy.jsx'));
 const Adventure     = lazy(() => import('./pages/Adventure.jsx'));
 const Calendar      = lazy(() => import('./pages/Calendar.jsx'));
-const TeachersKit   = lazy(() => import('./pages/TeachersKit.jsx'));
 
 // Admin completo en su propio chunk
 const Admin      = lazy(() => import('./pages/Admin.jsx'));
@@ -69,7 +68,8 @@ export default function App() {
             <Route path="/buddy"       element={<Buddy />} />
             <Route path="/aventura"    element={<Adventure />} />
             <Route path="/calendario"  element={<Calendar />} />
-            <Route path="/docentes"    element={<TeachersKit />} />
+            {/* Docentes ahora vive dentro de /admin/docentes (requiere login) */}
+            <Route path="/docentes"    element={<Navigate to="/admin/login" replace />} />
 
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/*"     element={<Admin />} />

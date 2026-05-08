@@ -1,17 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabaseClient.js';
 import SafetyNotice from '../components/SafetyNotice.jsx';
 import EmotionalAvatar from '../components/EmotionalAvatar.jsx';
-import { setStudent, clearStudent } from '../hooks/useStudent.js';
+import { setStudent, clearStudent, getStudent } from '../hooks/useStudent.js';
 
 export default function MyHistory() {
-  const [step, setStep] = useState('login');     // login | history | register
-  const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
+  const existing = getStudent();
+  const [step, setStep] = useState(existing?.code ? 'loading' : 'login');
+  const [code, setCode] = useState(existing?.code || '');
+  const [password, setPassword] = useState(existing?.password || '');
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Si ya hay sesión, intenta cargar histórico directo
+  useEffect(() => {
+    if (!existing?.code) return;
+    (async () => {
+      try {
+        const { data: hist, error } = await supabase.functions.invoke('anon-auth', {
+          body: { action: 'history', anonymous_code: existing.code, password: existing.password || '' },
+        });
+        if (error) throw error;
+        if (hist?.error) throw new Error(hist.error);
+        setData(hist);
+        setStep('history');
+      } catch (e) {
+        // Si falla (ej. password incorrecto guardado), regresa a login
+        setStep('login');
+        setErr(e.message);
+      }
+    })();
+  // eslint-disable-next-line
+  }, []);
 
   async function login() {
     setLoading(true); setErr(null);
@@ -59,6 +81,16 @@ export default function MyHistory() {
     }
   }
 
+  if (step === 'loading') {
+    return (
+      <section className="section">
+        <div className="container text-center" style={{maxWidth: 520}}>
+          <div className="spinner" style={{margin:'40px auto'}} />
+          <p className="lede">Cargando tu rincón…</p>
+        </div>
+      </section>
+    );
+  }
   if (step === 'history' && data) return <HistoryView data={data} code={code} onLogout={() => { clearStudent(); setStep('login'); setData(null); setCode(''); setPassword(''); }} />;
   if (step === 'registered') return <RegisteredOk code={code} />;
   if (step === 'register') return <RegisterForm onRegister={register} onCancel={() => setStep('login')} loading={loading} err={err} />;

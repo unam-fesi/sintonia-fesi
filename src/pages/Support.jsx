@@ -5,13 +5,18 @@ import SafetyNotice from '../components/SafetyNotice.jsx';
 
 export default function Support() {
   const [specialists, setSpecialists] = useState([]);
+  const [blocks, setBlocks] = useState([]);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
-    supabase.from('specialists')
-      .select('*').eq('active', true).order('full_name')
-      .then(({ data }) => setSpecialists(data || []));
+    Promise.all([
+      supabase.from('specialists').select('*').eq('active', true).order('full_name'),
+      supabase.from('content_blocks').select('*').eq('page','support').eq('active', true).order('order_idx'),
+    ]).then(([s, b]) => {
+      setSpecialists(s.data || []);
+      setBlocks(b.data || []);
+    });
   }, []);
 
   const specialties = [...new Set(specialists.map(s => s.specialty))];
@@ -78,15 +83,19 @@ export default function Support() {
           )}
         </section>
 
-        <section className="panel mt-4">
-          <h2>¿Cómo puedo prepararme para pedir ayuda?</h2>
-          <ol style={{lineHeight: 1.8}}>
-            <li><strong>Identifica qué te preocupa.</strong> Una sola frase basta. No necesitas tenerlo todo claro.</li>
-            <li><strong>Elige cómo te sientes más cómodo(a).</strong> Llamada, mensaje, presencial.</li>
-            <li><strong>Apóyate en alguien que te acompañe.</strong> Un amigo, familiar o tutor.</li>
-            <li><strong>Recuerda: pedir ayuda es un acto de cuidado.</strong> No es debilidad ni exageración.</li>
-          </ol>
-        </section>
+        {blocks.map(b => (
+          <section key={b.id} className="panel mt-4">
+            <h2>{b.emoji} {b.title}</h2>
+            {b.body && <p className="lede">{b.body}</p>}
+            {Array.isArray(b.list_items) && b.list_items.length > 0 && (
+              <ol style={{lineHeight: 1.8}}>
+                {b.list_items.map((it, i) => (
+                  <li key={i} dangerouslySetInnerHTML={{__html: renderMd(it)}} />
+                ))}
+              </ol>
+            )}
+          </section>
+        ))}
 
         <SafetyNotice variant="warm">
           <strong>Si estás en peligro inmediato</strong> o experimentas una emergencia médica,
@@ -153,4 +162,12 @@ export default function Support() {
       `}</style>
     </section>
   );
+}
+
+function renderMd(t) {
+  if (!t) return '';
+  return String(t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
 }
