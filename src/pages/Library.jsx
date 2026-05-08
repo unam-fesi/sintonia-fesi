@@ -92,22 +92,49 @@ export default function Library() {
   );
 }
 
+function resolveMediaUrl(url) {
+  if (!url) return '';
+  if (/^(https?:|data:|blob:)/.test(url)) return url;
+  const base = import.meta.env.BASE_URL || '/';
+  return base + url.replace(/^\/+/, '');
+}
+
+function fmtDuration(sec) {
+  if (!sec) return '';
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 function LibraryItem({ item }) {
+  const media = resolveMediaUrl(item.media_url);
   return (
     <article className="lib-item">
       <header>
         <span className="cat-badge">{categoryIcon(item.category)} {categoryLabel(item.category)}</span>
-        {item.duration_sec && <small>⏱ {Math.round(item.duration_sec / 60)} min</small>}
+        {item.duration_sec && <small>⏱ {fmtDuration(item.duration_sec)}</small>}
       </header>
       <h3>{item.title}</h3>
       {item.body && <p>{item.body}</p>}
+      {item.meta?.recommended_state && (
+        <p style={{fontSize:'0.84rem',color:'var(--c-gris)',fontStyle:'italic'}}>
+          💡 <strong>Recomendado para:</strong> {item.meta.recommended_state}
+        </p>
+      )}
+      {item.meta && (item.meta.tempo || item.meta.key) && (
+        <div className="audio-params">
+          {item.meta.tempo && <small>🎵 {item.meta.tempo}</small>}
+          {item.meta.key && <small>♪ {item.meta.key}</small>}
+          {item.meta.energy && <small>⚡ Energía {item.meta.energy.toLowerCase()}</small>}
+        </div>
+      )}
       {item.media_url && (
         item.category === 'video' ? (
-          <video controls src={item.media_url} style={{width:'100%', borderRadius: 8, marginTop: 8}} />
+          <video controls src={media} style={{width:'100%', borderRadius: 8, marginTop: 8}} />
         ) : item.category === 'sound' ? (
-          <audio controls src={item.media_url} style={{width:'100%', marginTop: 8}} />
+          <audio controls preload="none" src={media} style={{width:'100%', marginTop: 8}} />
         ) : (
-          <a href={item.media_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+          <a href={media} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
             Abrir recurso →
           </a>
         )
@@ -129,7 +156,9 @@ function LibraryItem({ item }) {
         }
         .lib-item small { color: var(--c-gris); font-size: 0.78rem; }
         .lib-item h3 { color: var(--c-azul-800); margin: 4px 0; font-size: 1rem; }
-        .lib-item p { color: var(--c-texto-soft); font-size: 0.92rem; margin: 0; flex: 1; }
+        .lib-item p { color: var(--c-texto-soft); font-size: 0.92rem; margin: 0 0 8px; }
+        .audio-params { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; padding: 6px 0; border-top: 1px dashed var(--c-borde-soft); }
+        .audio-params small { background: var(--c-azul-100); padding: 2px 8px; border-radius: 999px; font-size: 0.74rem; color: var(--c-azul-800); }
       `}</style>
     </article>
   );
