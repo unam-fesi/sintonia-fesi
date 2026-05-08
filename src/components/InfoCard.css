@@ -1,0 +1,29 @@
+.info-card {
+  background: #fff;
+  border: 1px solid var(--c-borde);
+  border-radius: var(--r-xl);
+  padding: 24px;
+  box-shadow: var(--sh-sm);
+  transition: transform var(--t), box-shadow var(--t);
+  position: relative;
+}
+
+.info-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
+
+.info-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  background: var(--c-azul-100);
+  color: var(--c-azul-800);
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+}
+
+.info-card h3 { color: var(--c-azul-800); margin: 0 0 6px; }
+.info-card p  { color: var(--c-texto-soft); margin: 0; font-size: 0.96rem; }
+
+.info-card.accent-oro    .info-icon { background: var(--c-oro-100);   color: #7B5E14; }
+.info-card.accent-salvia .info-icon { background: var(--c-salvia-100);color: #2F6048; }
+.info-card.accent-coral  .info-icon { background: var(--c-coral-100); color: #93362A; }
+.info-card.accent-lavanda .info-icon { background: var(--c-lavanda-100); color: #3F2F66; }

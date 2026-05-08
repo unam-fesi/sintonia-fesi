@@ -1,0 +1,81 @@
+/* =========================================================
+   Sintonía UNAM — Variables del sistema de diseño
+   Paleta institucional UNAM (azul marino + dorado) con
+   acentos basados en psicología del color para bienestar.
+   ========================================================= */
+
+:root {
+  /* --- Identidad UNAM --- */
+  --c-azul-900: #0A1929;        /* Profundidad, foco */
+  --c-azul-800: #10243E;        /* Color principal */
+  --c-azul-700: #1A3358;        /* Variante elevada */
+  --c-azul-100: #E8EDF4;        /* Fondo suave */
+  --c-azul-050: #F4F7FB;        /* Fondo aún más suave */
+
+  --c-oro-700: #B08F1F;
+  --c-oro-600: #C9A227;         /* Color de acento */
+  --c-oro-400: #E5C868;         /* Hover */
+  --c-oro-100: #FBF1D2;         /* Fondo de chips */
+
+  /* --- Acentos de bienestar --- */
+  --c-salvia-600: #6FA088;      /* Equilibrio */
+  --c-salvia-400: #8FB8A0;
+  --c-salvia-100: #E6F0EA;
+
+  --c-coral-600: #D26B53;       /* Cercanía */
+  --c-coral-500: #E8826B;
+  --c-coral-100: #FBE7E0;
+
+  --c-lavanda-500: #B7A8D9;     /* Calma */
+  --c-lavanda-100: #EFEBF7;
+
+  /* --- Neutros --- */
+  --c-marfil:    #FBF8F1;
+  --c-blanco:    #FFFFFF;
+  --c-texto:     #1F2A37;
+  --c-texto-soft: #4B5563;
+  --c-gris:      #6B7280;
+  --c-gris-claro:#9CA3AF;
+  --c-borde:     #E5E7EB;
+  --c-borde-soft:#EEF2F7;
+
+  /* --- Estados --- */
+  --c-exito:     #4F8A6E;
+  --c-warning:   #C58F2F;
+  --c-error:     #B5403E;
+
+  /* --- Niveles de atención (resultado del test) --- */
+  --c-nivel-bajo:        var(--c-salvia-600);
+  --c-nivel-bajo-soft:   var(--c-salvia-100);
+  --c-nivel-moderado:    var(--c-oro-600);
+  --c-nivel-moderado-soft: var(--c-oro-100);
+  --c-nivel-prioritario: var(--c-coral-600);
+  --c-nivel-prioritario-soft: var(--c-coral-100);
+
+  /* --- Tipografía --- */
+  --ff-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ff-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+
+  /* --- Métrica --- */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  --sh-sm: 0 4px 12px rgba(16, 36, 62, 0.06);
+  --sh-md: 0 10px 28px rgba(16, 36, 62, 0.10);
+  --sh-lg: 0 20px 48px rgba(16, 36, 62, 0.16);
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  --container-max: 1180px;
+  --t: 0.25s cubic-bezier(.2,.7,.2,1);
+}

@@ -1,0 +1,5 @@
+# Sintonía UNAM — Configuración local de Supabase CLI
+project_id = "sintonia-unam"
+
+[functions.generate-orientation]
+verify_jwt = false

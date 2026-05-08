@@ -1,0 +1,52 @@
+.dim-chart {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.dim-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.dim-label {
+  font-weight: 600;
+  color: var(--c-azul-800);
+  font-size: 0.98rem;
+}
+
+.dim-track {
+  height: 10px;
+  background: var(--c-azul-100);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.dim-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  transition: width 0.6s cubic-bezier(.2,.7,.2,1);
+}
+
+.dim-value {
+  font-family: var(--ff-serif);
+  font-weight: 700;
+  font-size: 1.3rem;
+  text-align: right;
+  line-height: 1.1;
+}
+.dim-value small {
+  display: block;
+  font-family: var(--ff-sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--c-gris);
+}
+
+@media (max-width: 640px) {
+  .dim-row { grid-template-columns: 1fr; gap: 6px; }
+  .dim-value { text-align: left; }
+}
