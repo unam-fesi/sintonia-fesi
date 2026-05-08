@@ -13,7 +13,11 @@ export const isSupabaseConfigured = Boolean(url && anonKey);
 
 export const supabase = isSupabaseConfigured
   ? createClient(url, anonKey, {
-      auth: { persistSession: false }, // Sin sesión en flujo público
+      auth: {
+        persistSession: true,        // Necesario para mantener login admin
+        autoRefreshToken: true,
+        storageKey: 'sintonia.auth', // Aislado de otros apps
+      },
     })
   : null;
 

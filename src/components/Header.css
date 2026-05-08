@@ -52,7 +52,7 @@
   align-items: center;
 }
 
-.nav a {
+.nav a:not(.btn) {
   padding: 9px 14px;
   border-radius: var(--r-pill);
   font-weight: 600;
@@ -61,8 +61,8 @@
   transition: background var(--t);
 }
 
-.nav a:hover { background: var(--c-azul-100); }
-.nav a.active { background: var(--c-azul-100); color: var(--c-azul-800); }
+.nav a:not(.btn):hover { background: var(--c-azul-100); }
+.nav a.active:not(.btn) { background: var(--c-azul-100); color: var(--c-azul-800); }
 
 .nav-cta { padding: 10px 18px !important; }
 

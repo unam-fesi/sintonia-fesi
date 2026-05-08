@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 
@@ -9,11 +9,17 @@ import Results    from './pages/Results.jsx';
 import Resources  from './pages/Resources.jsx';
 import Privacy    from './pages/Privacy.jsx';
 import Admin      from './pages/Admin.jsx';
+import AdminLogin from './pages/AdminLogin.jsx';
 
 export default function App() {
+  const location = useLocation();
+  // Las rutas /admin/* tienen su propio chrome (sidebar + login screen).
+  // No mostramos el header/footer públicos ahí para evitar duplicar navegación.
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <>
-      <Header />
+      {!isAdminRoute && <Header />}
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -22,11 +28,16 @@ export default function App() {
           <Route path="/resultado" element={<Results />} />
           <Route path="/recursos" element={<Resources />} />
           <Route path="/privacidad" element={<Privacy />} />
-          <Route path="/admin" element={<Admin />} />
+
+          {/* Login antes de la ruta protegida; usar rutas anidadas para que Admin
+              pueda definir sus subrutas (usuarios, sesiones). */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<Admin />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </>
   );
 }

@@ -1,20 +1,150 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, NavLink, Routes, Route } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../config/supabaseClient.js';
+import { getAdminContext, signOut, can } from '../services/authService.js';
 import { checkSupabaseHealth } from '../services/supabaseService.js';
 import { checkOrientationHealth } from '../services/geminiService.js';
+import DimensionBubbles from '../components/DimensionBubbles.jsx';
 
-const initialMetrics = {
-  totalSessions: null,
-  averageScore: null,
-  topDimensions: [],
-  topResources: [],
-  recent: [],
-  loading: true,
+const ROLE_LABEL = {
+  admin: 'Administrador',
+  analista: 'Analista',
+  especialista: 'Especialista',
+  coordinador: 'Coordinador',
 };
 
 export default function Admin() {
-  const [conn, setConn] = useState({ supabase: null, gemini: null });
-  const [metrics, setMetrics] = useState(initialMetrics);
+  const navigate = useNavigate();
+  const [ctx, setCtx] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const c = await getAdminContext().catch(() => null);
+      if (!c) {
+        navigate('/admin/login', { replace: true });
+        return;
+      }
+      setCtx(c);
+      setLoading(false);
+    })();
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <section className="section">
+        <div className="container text-center">
+          <div className="spinner" style={{margin: '40px auto 18px'}} />
+          <p className="lede">Verificando sesión…</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!ctx) return null;
+
+  return (
+    <div className="admin-shell">
+      <AdminSidebar ctx={ctx} />
+      <main className="admin-main">
+        <Routes>
+          <Route index element={<AdminDashboard ctx={ctx} />} />
+          {can(ctx.admin.role, 'manage_users') && (
+            <Route path="usuarios" element={<AdminUsers ctx={ctx} />} />
+          )}
+          {can(ctx.admin.role, 'view_detail') && (
+            <Route path="sesiones" element={<AdminSessions />} />
+          )}
+        </Routes>
+      </main>
+
+      <style>{`
+        .admin-shell {
+          display: grid;
+          grid-template-columns: 240px 1fr;
+          min-height: calc(100vh - 80px);
+        }
+        .admin-side {
+          background: var(--c-azul-800);
+          color: #fff;
+          padding: 24px 18px;
+        }
+        .admin-side .role-chip {
+          display: inline-block;
+          padding: 4px 10px;
+          background: var(--c-oro-600);
+          color: var(--c-azul-800);
+          border-radius: 999px;
+          font-size: 0.74rem;
+          font-weight: 800;
+          margin-bottom: 6px;
+          text-transform: uppercase;
+        }
+        .admin-side h3 { color: #fff; margin: 0 0 4px; font-size: 1.05rem; }
+        .admin-side .email { font-size: 0.84rem; color: rgba(255,255,255,0.7); margin: 0 0 18px; word-break: break-all; }
+        .admin-nav { display: grid; gap: 4px; }
+        .admin-nav a {
+          padding: 10px 14px;
+          border-radius: 10px;
+          color: rgba(255,255,255,0.85);
+          font-size: 0.94rem;
+          font-weight: 600;
+          transition: background 0.2s;
+        }
+        .admin-nav a:hover { background: rgba(255,255,255,0.08); }
+        .admin-nav a.active { background: var(--c-oro-600); color: var(--c-azul-800); }
+        .admin-side .logout {
+          margin-top: 20px;
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.2);
+          color: var(--c-oro-400);
+          width: 100%;
+          padding: 10px;
+          border-radius: 10px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .admin-side .logout:hover { background: rgba(255,255,255,0.05); }
+        .admin-main { padding: 28px 32px 60px; background: var(--c-marfil); }
+
+        @media (max-width: 880px) {
+          .admin-shell { grid-template-columns: 1fr; }
+          .admin-side { padding: 16px; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function AdminSidebar({ ctx }) {
+  const r = ctx.admin.role;
+  return (
+    <aside className="admin-side">
+      <span className="role-chip">{ROLE_LABEL[r] || r}</span>
+      <h3>{ctx.admin.full_name || ctx.admin.email}</h3>
+      <p className="email">{ctx.admin.email}</p>
+
+      <nav className="admin-nav">
+        <NavLink to="" end>📊 Dashboard</NavLink>
+        {can(r, 'view_detail') && <NavLink to="sesiones">🔍 Sesiones detalladas</NavLink>}
+        {can(r, 'manage_users') && <NavLink to="usuarios">👥 Usuarios admin</NavLink>}
+      </nav>
+
+      <button className="logout" onClick={async () => {
+        await signOut();
+        window.location.href = import.meta.env.BASE_URL + 'admin/login';
+      }}>↩ Cerrar sesión</button>
+    </aside>
+  );
+}
+
+// =============================================================
+// Dashboard
+// =============================================================
+function AdminDashboard({ ctx }) {
+  const r = ctx.admin.role;
+  const [conn, setConn] = useState({});
+  const [metrics, setMetrics] = useState({ loading: true });
 
   useEffect(() => {
     (async () => {
@@ -24,129 +154,153 @@ export default function Admin() {
   }, []);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setMetrics(m => ({ ...m, loading: false }));
-      return;
-    }
+    if (!isSupabaseConfigured) { setMetrics({ loading: false }); return; }
+    if (!can(r, 'view_aggregated')) { setMetrics({ loading: false }); return; }
+
     (async () => {
       try {
-        const { count: total } = await supabase
-          .from('assessment_sessions')
-          .select('*', { count: 'exact', head: true });
+        const [{ count: total }, dimResult, recentResult] = await Promise.all([
+          supabase.from('assessment_sessions').select('*', { count: 'exact', head: true }),
+          supabase.from('view_dimension_impact').select('*'),
+          supabase
+            .from('assessment_sessions')
+            .select('id, anonymous_code, total_score, general_level, top_attention_areas, created_at')
+            .order('created_at', { ascending: false })
+            .limit(10),
+        ]);
 
-        const { data: lastSessions } = await supabase
-          .from('assessment_sessions')
-          .select('id, anonymous_code, total_score, general_level, top_attention_areas, created_at')
-          .order('created_at', { ascending: false })
-          .limit(8);
-
-        const avg = lastSessions?.length
-          ? Math.round(lastSessions.reduce((s, r) => s + (r.total_score || 0), 0) / lastSessions.length)
+        const recent = recentResult.data || [];
+        const avg = recent.length
+          ? Math.round(recent.reduce((s, r) => s + (r.total_score || 0), 0) / recent.length)
           : null;
 
-        // Conteo de áreas con atención (de los registros recientes)
-        const dimCount = {};
-        for (const s of lastSessions || []) {
-          for (const a of s.top_attention_areas || []) {
-            dimCount[a.label] = (dimCount[a.label] || 0) + 1;
-          }
+        const levels = { bajo: 0, moderado: 0, prioritario: 0 };
+        const lvlResult = await supabase
+          .from('assessment_sessions')
+          .select('general_level')
+          .not('general_level', 'is', null);
+        for (const row of lvlResult.data || []) {
+          if (levels[row.general_level] !== undefined) levels[row.general_level]++;
         }
-        const topDimensions = Object.entries(dimCount)
-          .sort((a, b) => b[1] - a[1])
-          .map(([label, count]) => ({ label, count }));
 
         setMetrics({
-          totalSessions: total ?? 0,
-          averageScore: avg,
-          topDimensions,
-          topResources: [], // se completa en Fase 2 con tabla de selecciones
-          recent: lastSessions || [],
           loading: false,
+          total: total ?? 0,
+          avg,
+          recent,
+          dimensions: dimResult.data || [],
+          levels,
         });
-      } catch {
-        setMetrics(m => ({ ...m, loading: false }));
+      } catch (e) {
+        console.warn(e);
+        setMetrics({ loading: false, error: e.message });
       }
     })();
-  }, []);
+  }, [r]);
 
   return (
-    <section className="section">
-      <div className="container">
-        <header style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 12}}>
-          <div>
-            <span className="tag">Panel administrativo · prototipo</span>
-            <h1 className="mt-2">Métricas agregadas</h1>
+    <>
+      <header className="page-head">
+        <div>
+          <span className="tag">Panel administrativo</span>
+          <h1 className="mt-2">Bienvenida, bienvenido</h1>
+          <p className="lede">
+            Como <strong>{ROLE_LABEL[r]}</strong>, accedes a {permissionsDescription(r)}.
+          </p>
+        </div>
+        <div className="health">
+          <ConnChip label="Supabase" ok={conn.supabase?.ok} />
+          <ConnChip label="Gemini"   ok={conn.gemini?.ok} />
+        </div>
+      </header>
+
+      {metrics.loading ? (
+        <div className="text-center mt-4"><div className="spinner" style={{margin: '0 auto'}} /></div>
+      ) : (
+        <>
+          <div className="kpi-grid">
+            <Kpi label="Sesiones totales" value={metrics.total ?? '—'} />
+            <Kpi label="Promedio reciente" value={metrics.avg ?? '—'} suffix="/100" />
+            <Kpi label="Nivel bajo"        value={metrics.levels?.bajo ?? 0}        accent="sage" />
+            <Kpi label="Nivel moderado"    value={metrics.levels?.moderado ?? 0}    accent="gold" />
+            <Kpi label="Nivel prioritario" value={metrics.levels?.prioritario ?? 0} accent="coral" />
+          </div>
+
+          <section className="panel mt-4">
+            <span className="tag">Modelo dimensional de impacto</span>
+            <h2 className="mt-2">Esferas de bienestar</h2>
             <p className="lede">
-              Esta vista no muestra datos personales. En Fase 2 se integrará con autenticación
-              de Supabase.
+              Cada esfera representa una dimensión del bienestar. El tamaño es proporcional al
+              número de menciones en áreas de atención de las sesiones completadas. Esto te
+              ayuda a identificar dónde está el mayor impacto.
             </p>
-          </div>
-          <div className="health">
-            <ConnChip label="Supabase" ok={conn.supabase?.ok} reason={conn.supabase?.reason} />
-            <ConnChip label="Gemini" ok={conn.gemini?.ok} reason={conn.gemini?.reason} />
-          </div>
-        </header>
+            <DimensionBubbles data={metrics.dimensions || []} />
+          </section>
 
-        <div className="kpi-grid mt-4">
-          <KpiCard label="Sesiones totales" value={metrics.totalSessions ?? '—'} />
-          <KpiCard label="Promedio reciente (0-100)" value={metrics.averageScore ?? '—'} />
-          <KpiCard label="Áreas de atención frecuentes" value={metrics.topDimensions.length} />
-          <KpiCard label="Estado del programa" value={metrics.loading ? '⏳' : '✅'} />
-        </div>
-
-        <div className="panel mt-4">
-          <h2>Áreas de mayor atención reciente</h2>
-          {metrics.topDimensions.length === 0 ? (
-            <p className="note">No hay datos suficientes todavía.</p>
-          ) : (
-            <ul className="rec-list">
-              {metrics.topDimensions.map(d => (
-                <li key={d.label}><strong>{d.label}</strong> · {d.count} menciones</li>
-              ))}
-            </ul>
+          {can(r, 'view_aggregated') && (
+            <section className="panel mt-4">
+              <h2>Sesiones recientes</h2>
+              <p className="note">
+                {can(r, 'view_detail')
+                  ? 'Vista agregada. Para ver el detalle por sesión, ve a "Sesiones detalladas".'
+                  : 'Vista agregada — los detalles individuales requieren rol de Especialista o Administrador.'}
+              </p>
+              <div className="table-wrap mt-2">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Código</th>
+                      <th>Puntaje</th>
+                      <th>Nivel</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(metrics.recent || []).length === 0 ? (
+                      <tr><td colSpan={4} className="note text-center">Sin registros aún.</td></tr>
+                    ) : metrics.recent.map(s => (
+                      <tr key={s.id}>
+                        <td>{new Date(s.created_at).toLocaleString('es-MX')}</td>
+                        <td><code>{s.anonymous_code}</code></td>
+                        <td>{s.total_score ?? '—'}</td>
+                        <td><span className={`lvl-bg-${s.general_level}`} style={{padding:'4px 10px',borderRadius:8,fontWeight:700}}>{s.general_level || '—'}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
           )}
-        </div>
-
-        <div className="panel mt-4">
-          <h2>Últimas sesiones (anónimas)</h2>
-          <div className="table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr><th>Fecha</th><th>Código</th><th>Puntaje</th><th>Nivel</th></tr>
-              </thead>
-              <tbody>
-                {metrics.recent.length === 0 ? (
-                  <tr><td colSpan={4} className="note text-center">Sin registros aún.</td></tr>
-                ) : metrics.recent.map(r => (
-                  <tr key={r.id}>
-                    <td>{new Date(r.created_at).toLocaleString('es-MX')}</td>
-                    <td><code>{r.anonymous_code}</code></td>
-                    <td>{r.total_score ?? '—'}</td>
-                    <td>{r.general_level ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
 
       <style>{`
+        .page-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+        .page-head h1 { margin: 0 0 6px; }
         .health { display: flex; gap: 8px; flex-wrap: wrap; }
         .conn-chip {
-          display: inline-flex; align-items: center; gap: 6px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
           padding: 6px 12px;
           border-radius: var(--r-pill);
           font-size: 0.84rem;
           font-weight: 700;
         }
-        .conn-chip.ok    { background: var(--c-salvia-100); color: #2F6048; }
-        .conn-chip.fail  { background: var(--c-coral-100); color: #93362A; }
+        .conn-chip.ok      { background: var(--c-salvia-100); color: #2F6048; }
+        .conn-chip.fail    { background: var(--c-coral-100); color: #93362A; }
         .conn-chip.unknown { background: var(--c-azul-100); color: var(--c-azul-800); }
 
         .kpi-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
           gap: 14px;
         }
         .kpi-card {
@@ -156,7 +310,16 @@ export default function Admin() {
           padding: 18px;
         }
         .kpi-card .label { font-size: 0.84rem; color: var(--c-gris); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; }
-        .kpi-card .value { font-family: var(--ff-serif); font-size: 1.8rem; color: var(--c-azul-800); margin-top: 4px; font-weight: 800; }
+        .kpi-card .value {
+          font-family: var(--ff-serif);
+          font-size: 2rem;
+          color: var(--c-azul-800);
+          margin-top: 4px;
+          font-weight: 800;
+        }
+        .kpi-card.sage  { border-color: var(--c-salvia-400); }
+        .kpi-card.gold  { border-color: var(--c-oro-600); }
+        .kpi-card.coral { border-color: var(--c-coral-500); }
 
         .table-wrap {
           background: #fff;
@@ -166,34 +329,297 @@ export default function Admin() {
         }
         .admin-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
         .admin-table th, .admin-table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--c-borde-soft); }
-        .admin-table th { background: var(--c-azul-100); color: var(--c-azul-800); font-weight: 800; font-size: 0.84rem; text-transform: uppercase; letter-spacing: 0.03em; }
-
-        .rec-list { list-style: none; padding: 0; display: grid; gap: 8px; margin: 12px 0 0; }
-        .rec-list li { padding: 10px 14px; background: var(--c-marfil); border-radius: 12px; border: 1px solid var(--c-borde-soft); }
-
-        @media (max-width: 880px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
+        .admin-table th { background: var(--c-azul-100); color: var(--c-azul-800); font-weight: 800; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em; }
       `}</style>
-    </section>
+    </>
   );
 }
 
-function KpiCard({ label, value }) {
+function permissionsDescription(role) {
+  switch (role) {
+    case 'admin':       return 'control total: gestión de usuarios, contenido y todas las métricas';
+    case 'especialista': return 'detalle de sesiones individuales y métricas agregadas';
+    case 'analista':    return 'métricas agregadas y modelo dimensional';
+    case 'coordinador': return 'gestión de contenido (recursos, recomendaciones)';
+    default:            return 'el panel administrativo';
+  }
+}
+
+function Kpi({ label, value, suffix, accent }) {
   return (
-    <div className="kpi-card">
+    <div className={`kpi-card ${accent || ''}`}>
       <div className="label">{label}</div>
-      <div className="value">{value}</div>
+      <div className="value">
+        {value}
+        {suffix && <small style={{fontSize:'0.55em',marginLeft:4,color:'var(--c-gris)'}}>{suffix}</small>}
+      </div>
     </div>
   );
 }
 
-function ConnChip({ label, ok, reason }) {
+function ConnChip({ label, ok }) {
   let cls = 'unknown', icon = '⏳';
   if (ok === true) { cls = 'ok'; icon = '✓'; }
   else if (ok === false) { cls = 'fail'; icon = '✗'; }
+  return <span className={`conn-chip ${cls}`}>{icon} {label}</span>;
+}
+
+// =============================================================
+// Sesiones detalladas (solo especialista/admin)
+// =============================================================
+function AdminSessions() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('assessment_sessions')
+        .select('id, anonymous_code, total_score, general_level, dimension_scores, top_attention_areas, created_at')
+        .order('created_at', { ascending: false })
+        .limit(40);
+      setRows(data || []);
+      setLoading(false);
+    })();
+  }, []);
+
   return (
-    <span className={`conn-chip ${cls}`} title={reason || ''}>
-      {icon} {label}
-    </span>
+    <>
+      <header className="page-head">
+        <div>
+          <span className="tag coral">Detalle</span>
+          <h1 className="mt-2">Sesiones individuales</h1>
+          <p className="lede">
+            Cada sesión es anónima. No mostramos información que pueda identificar a la persona.
+          </p>
+        </div>
+      </header>
+
+      {loading ? <div className="spinner" style={{margin: '40px auto'}} /> : (
+        <div className="sessions-grid">
+          {rows.length === 0 && (
+            <p className="note">Aún no hay sesiones para mostrar.</p>
+          )}
+          {rows.map(s => (
+            <article key={s.id} className="session-card">
+              <header>
+                <code>{s.anonymous_code}</code>
+                <span className={`lvl-bg-${s.general_level}`} style={{padding:'3px 10px',borderRadius:8,fontSize:'0.78rem',fontWeight:700}}>
+                  {s.general_level}
+                </span>
+              </header>
+              <div className="score">{s.total_score} <small>/100</small></div>
+              <small className="date">{new Date(s.created_at).toLocaleString('es-MX')}</small>
+              <div className="dims">
+                {Object.entries(s.dimension_scores || {}).map(([id, d]) => (
+                  <div key={id} className="dim-row">
+                    <span>{d.label}</span>
+                    <span className={`lvl-${d.level}`}>{d.score}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        .sessions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 14px;
+        }
+        .session-card {
+          background: #fff;
+          border: 1px solid var(--c-borde);
+          border-radius: var(--r-md);
+          padding: 18px;
+        }
+        .session-card header {
+          display: flex; justify-content: space-between; align-items: center;
+          margin-bottom: 8px;
+        }
+        .session-card code { font-size: 0.86rem; color: var(--c-azul-800); font-weight: 700; }
+        .session-card .score { font-family: var(--ff-serif); font-size: 1.8rem; font-weight: 800; color: var(--c-azul-800); }
+        .session-card .score small { font-size: 0.6em; color: var(--c-gris); }
+        .session-card .date { color: var(--c-gris); font-size: 0.78rem; display: block; margin-bottom: 10px; }
+        .dims { display: grid; gap: 4px; padding-top: 10px; border-top: 1px solid var(--c-borde-soft); }
+        .dim-row { display: flex; justify-content: space-between; font-size: 0.86rem; }
+        .dim-row span:first-child { color: var(--c-texto-soft); }
+        .dim-row span:last-child { font-weight: 700; }
+      `}</style>
+    </>
+  );
+}
+
+// =============================================================
+// Gestión de usuarios admin (solo rol admin)
+// =============================================================
+function AdminUsers({ ctx }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ email: '', full_name: '', role: 'analista' });
+  const [msg, setMsg] = useState(null);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase
+      .from('admin_users')
+      .select('id, email, full_name, role, active, last_access, created_at')
+      .order('created_at', { ascending: false });
+    setUsers(data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function handleAdd(e) {
+    e.preventDefault();
+    setMsg(null);
+    const { error } = await supabase
+      .from('admin_users')
+      .upsert({
+        email: form.email.trim(),
+        full_name: form.full_name.trim(),
+        role: form.role,
+        active: true,
+      }, { onConflict: 'email' });
+    if (error) {
+      setMsg({ type: 'error', text: error.message });
+      return;
+    }
+    setMsg({ type: 'ok', text: 'Usuario actualizado. Recuerda que también debe existir en Authentication → Users de Supabase.' });
+    setForm({ email: '', full_name: '', role: 'analista' });
+    load();
+  }
+
+  async function setRole(id, role) {
+    const { error } = await supabase.from('admin_users').update({ role }).eq('id', id);
+    if (error) setMsg({ type: 'error', text: error.message });
+    else load();
+  }
+
+  async function toggleActive(id, active) {
+    const { error } = await supabase.from('admin_users').update({ active }).eq('id', id);
+    if (error) setMsg({ type: 'error', text: error.message });
+    else load();
+  }
+
+  return (
+    <>
+      <header className="page-head">
+        <div>
+          <span className="tag azul">Usuarios</span>
+          <h1 className="mt-2">Gestión de equipo administrativo</h1>
+          <p className="lede">
+            Define quién accede al panel y con qué permisos. Solo el rol{' '}
+            <strong>Administrador</strong> puede modificar esta sección.
+          </p>
+        </div>
+      </header>
+
+      <section className="panel">
+        <h2>Agregar / actualizar miembro</h2>
+        <p className="note">
+          La cuenta debe existir primero en <strong>Authentication → Users</strong> de Supabase
+          (con su correo y contraseña). Aquí asignas su rol en el programa.
+        </p>
+        <form onSubmit={handleAdd} className="user-form mt-2">
+          <div className="field">
+            <label>Correo</label>
+            <input type="email" required value={form.email}
+              onChange={e => setForm(f => ({...f, email: e.target.value}))}
+              placeholder="usuario@unam.mx" />
+          </div>
+          <div className="field">
+            <label>Nombre completo</label>
+            <input type="text" value={form.full_name}
+              onChange={e => setForm(f => ({...f, full_name: e.target.value}))} />
+          </div>
+          <div className="field">
+            <label>Rol</label>
+            <select value={form.role} onChange={e => setForm(f => ({...f, role: e.target.value}))}>
+              <option value="analista">Analista</option>
+              <option value="especialista">Especialista</option>
+              <option value="coordinador">Coordinador</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <button className="btn btn-primary" type="submit">Guardar</button>
+        </form>
+        {msg && (
+          <p className={`feedback ${msg.type}`}>{msg.text}</p>
+        )}
+      </section>
+
+      <section className="panel mt-4">
+        <h2>Equipo actual</h2>
+        {loading ? <div className="spinner" style={{margin:'24px auto'}} /> : (
+          <div className="table-wrap mt-2">
+            <table className="admin-table">
+              <thead>
+                <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Activo</th><th></th></tr>
+              </thead>
+              <tbody>
+                {users.length === 0 ? (
+                  <tr><td colSpan={5} className="note text-center">Aún no hay miembros.</td></tr>
+                ) : users.map(u => (
+                  <tr key={u.id}>
+                    <td><strong>{u.full_name || '—'}</strong></td>
+                    <td>{u.email}</td>
+                    <td>
+                      <select
+                        value={u.role}
+                        onChange={e => setRole(u.id, e.target.value)}
+                        disabled={u.id === ctx.admin.id}
+                      >
+                        <option value="analista">Analista</option>
+                        <option value="especialista">Especialista</option>
+                        <option value="coordinador">Coordinador</option>
+                        <option value="admin">Administrador</option>
+                      </select>
+                    </td>
+                    <td>
+                      <label className="toggle">
+                        <input
+                          type="checkbox"
+                          checked={u.active}
+                          onChange={e => toggleActive(u.id, e.target.checked)}
+                          disabled={u.id === ctx.admin.id}
+                        />
+                        <span>{u.active ? 'Activo' : 'Inactivo'}</span>
+                      </label>
+                    </td>
+                    <td><small className="note">{u.last_access ? new Date(u.last_access).toLocaleString('es-MX') : 'Sin acceso aún'}</small></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <style>{`
+        .user-form {
+          display: grid;
+          grid-template-columns: 2fr 2fr 1.2fr auto;
+          gap: 12px;
+          align-items: end;
+        }
+        .feedback {
+          padding: 10px 14px;
+          border-radius: 12px;
+          margin-top: 12px;
+          font-size: 0.92rem;
+        }
+        .feedback.ok    { background: var(--c-salvia-100); color: #2F6048; }
+        .feedback.error { background: var(--c-coral-100); color: #93362A; }
+        .toggle { display: inline-flex; align-items: center; gap: 6px; }
+
+        @media (max-width: 880px) {
+          .user-form { grid-template-columns: 1fr; }
+        }
+      `}</style>
+    </>
   );
 }
