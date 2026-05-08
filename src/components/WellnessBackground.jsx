@@ -1,30 +1,16 @@
 // =============================================================
-// Sintonía UNAM — Background animado para páginas públicas
-// 3 blobs orgánicos con drift continuo + partículas flotantes
-// + parallax sutil ligado al scroll.
-// Respeta prefers-reduced-motion.
+// Sintonía UNAM — Background "marea de acuarela"
+// Wash base con gradiente desplazándose lento + blobs gigantes con
+// mix-blend-mode + parallax sutil al scroll. Tema wellness con
+// lavanda dominante para sensación de calma.
 // =============================================================
 
 import { useEffect, useRef } from 'react';
-
-const PARTICLES = [
-  { x: 12, delay: 0,  duration: 24, size: 14, color: 'var(--c-salvia-400)', shape: 'leaf' },
-  { x: 28, delay: 4,  duration: 28, size: 10, color: 'var(--c-oro-400)',    shape: 'circle' },
-  { x: 42, delay: 9,  duration: 22, size: 12, color: 'var(--c-lavanda-500)', shape: 'leaf' },
-  { x: 60, delay: 2,  duration: 30, size: 8,  color: 'var(--c-coral-500)',  shape: 'circle' },
-  { x: 76, delay: 12, duration: 26, size: 14, color: 'var(--c-salvia-600)', shape: 'leaf' },
-  { x: 88, delay: 6,  duration: 28, size: 10, color: 'var(--c-oro-600)',    shape: 'circle' },
-  { x: 18, delay: 14, duration: 32, size: 8,  color: 'var(--c-lavanda-500)', shape: 'circle' },
-  { x: 50, delay: 18, duration: 25, size: 12, color: 'var(--c-salvia-400)', shape: 'leaf' },
-  { x: 68, delay: 8,  duration: 30, size: 9,  color: 'var(--c-oro-400)',    shape: 'circle' },
-  { x: 32, delay: 16, duration: 26, size: 11, color: 'var(--c-coral-500)',  shape: 'leaf' },
-];
 
 export default function WellnessBackground() {
   const bgRef = useRef(null);
 
   useEffect(() => {
-    // Respetar usuarios que prefieren menos animación
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) return;
 
@@ -32,8 +18,8 @@ export default function WellnessBackground() {
     function update() {
       if (!bgRef.current) return;
       const y = window.scrollY;
-      // Parallax muy sutil — el background se mueve al ~15% del scroll
-      bgRef.current.style.transform = `translateY(${y * -0.15}px)`;
+      // Parallax sutil
+      bgRef.current.style.transform = `translate3d(0, ${y * -0.10}px, 0)`;
       raf = null;
     }
     function onScroll() {
@@ -49,140 +35,129 @@ export default function WellnessBackground() {
 
   return (
     <div ref={bgRef} className="wellness-bg" aria-hidden="true">
-      {/* Blobs orgánicos */}
-      <div className="bg-blob bg-blob-1" />
-      <div className="bg-blob bg-blob-2" />
-      <div className="bg-blob bg-blob-3" />
-      <div className="bg-blob bg-blob-4" />
+      {/* Wash base que rota muy lento */}
+      <div className="bg-wash" />
 
-      {/* Partículas flotantes */}
-      <div className="bg-particles">
-        {PARTICLES.map((p, i) => (
-          <span
-            key={i}
-            className={`bg-particle bg-particle-${p.shape}`}
-            style={{
-              left: `${p.x}%`,
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              background: p.shape === 'circle' ? p.color : undefined,
-              color: p.shape === 'leaf' ? p.color : undefined,
-              animationDelay: `-${p.delay}s`,
-              animationDuration: `${p.duration}s`,
-            }}
-          >
-            {p.shape === 'leaf' && (
-              <svg viewBox="0 0 16 16" width="100%" height="100%">
-                <path d="M8 1 C 14 1, 15 9, 8 15 C 1 9, 2 1, 8 1 Z M 8 4 L 8 13" fill="currentColor" stroke="currentColor" strokeWidth="0.6" opacity="0.6"/>
-              </svg>
-            )}
-          </span>
-        ))}
-      </div>
+      {/* Blobs gigantes que se mezclan */}
+      <div className="bg-blob bg-blob-lavender" />
+      <div className="bg-blob bg-blob-sage" />
+      <div className="bg-blob bg-blob-gold" />
+      <div className="bg-blob bg-blob-coral" />
+      <div className="bg-blob bg-blob-blue" />
 
       <style>{`
         .wellness-bg {
           position: fixed;
-          inset: 0;
+          inset: -10vh -10vw;     /* Sobre-cubre los bordes para que el parallax no muestre vacío */
           z-index: -1;
           pointer-events: none;
           overflow: hidden;
           will-change: transform;
         }
 
-        /* ===== Blobs ===== */
+        /* ===== Wash base (gradiente desplazándose) ===== */
+        .bg-wash {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(135deg,
+              rgba(183, 168, 217, 0.55) 0%,
+              rgba(143, 184, 160, 0.45) 30%,
+              rgba(232, 200, 104, 0.40) 60%,
+              rgba(232, 130, 107, 0.35) 100%
+            );
+          background-size: 250% 250%;
+          animation: washShift 32s ease-in-out infinite;
+          opacity: 0.85;
+        }
+        @keyframes washShift {
+          0%   { background-position:   0%   0%; }
+          25%  { background-position: 100%  30%; }
+          50%  { background-position: 100% 100%; }
+          75%  { background-position:   0%  70%; }
+          100% { background-position:   0%   0%; }
+        }
+
+        /* ===== Blobs de color que se mezclan ===== */
         .bg-blob {
           position: absolute;
           border-radius: 50%;
-          filter: blur(70px);
-          opacity: 0.32;
+          filter: blur(90px);
+          mix-blend-mode: multiply;
           will-change: transform;
         }
-        .bg-blob-1 {
-          width: 460px; height: 460px;
-          top: -120px; left: -120px;
-          background: radial-gradient(circle, var(--c-salvia-400), transparent 65%);
-          animation: drift1 22s ease-in-out infinite;
+
+        .bg-blob-lavender {
+          width: 90vmax; height: 90vmax;
+          top: -25vmax; left: -25vmax;
+          background: radial-gradient(circle, var(--c-lavanda-500) 0%, transparent 55%);
+          opacity: 0.75;
+          animation: drift-1 38s ease-in-out infinite;
         }
-        .bg-blob-2 {
-          width: 380px; height: 380px;
-          top: 25%; right: -120px;
-          background: radial-gradient(circle, var(--c-oro-400), transparent 65%);
-          animation: drift2 26s ease-in-out infinite;
+        .bg-blob-sage {
+          width: 80vmax; height: 80vmax;
+          bottom: -20vmax; right: -15vmax;
+          background: radial-gradient(circle, var(--c-salvia-400) 0%, transparent 55%);
+          opacity: 0.7;
+          animation: drift-2 42s ease-in-out infinite;
         }
-        .bg-blob-3 {
-          width: 500px; height: 500px;
-          bottom: -150px; left: 25%;
-          background: radial-gradient(circle, var(--c-lavanda-500), transparent 60%);
-          animation: drift3 28s ease-in-out infinite;
+        .bg-blob-gold {
+          width: 70vmax; height: 70vmax;
+          top: 20vh; right: -15vmax;
+          background: radial-gradient(circle, var(--c-oro-400) 0%, transparent 60%);
+          opacity: 0.55;
+          animation: drift-3 36s ease-in-out infinite;
         }
-        .bg-blob-4 {
-          width: 360px; height: 360px;
-          bottom: 15%; right: 8%;
-          background: radial-gradient(circle, var(--c-coral-500), transparent 65%);
-          opacity: 0.18;
-          animation: drift4 24s ease-in-out infinite;
+        .bg-blob-coral {
+          width: 60vmax; height: 60vmax;
+          bottom: 10vh; left: -10vmax;
+          background: radial-gradient(circle, var(--c-coral-500) 0%, transparent 60%);
+          opacity: 0.45;
+          animation: drift-4 44s ease-in-out infinite;
+        }
+        .bg-blob-blue {
+          width: 65vmax; height: 65vmax;
+          top: 50vh; left: 30vw;
+          background: radial-gradient(circle, var(--c-azul-700) 0%, transparent 60%);
+          opacity: 0.30;
+          animation: drift-5 50s ease-in-out infinite;
         }
 
-        @keyframes drift1 {
-          0%, 100% { transform: translate(0, 0)        scale(1); }
-          33%      { transform: translate(50px, 30px)  scale(1.08); }
-          66%      { transform: translate(-30px, 60px) scale(0.92); }
+        @keyframes drift-1 {
+          0%, 100% { transform: translate(0, 0)              scale(1); }
+          25%      { transform: translate(20vw, 25vh)        scale(1.10); }
+          50%      { transform: translate(40vw, -10vh)       scale(0.95); }
+          75%      { transform: translate(-10vw, 30vh)       scale(1.05); }
         }
-        @keyframes drift2 {
-          0%, 100% { transform: translate(0, 0)        scale(1); }
-          33%      { transform: translate(-40px, -30px) scale(1.05); }
-          66%      { transform: translate(20px, 40px)  scale(0.95); }
+        @keyframes drift-2 {
+          0%, 100% { transform: translate(0, 0)              scale(1); }
+          33%      { transform: translate(-25vw, -20vh)      scale(1.08); }
+          66%      { transform: translate(15vw, -10vh)       scale(0.92); }
         }
-        @keyframes drift3 {
-          0%, 100% { transform: translate(0, 0)        scale(1); }
-          50%      { transform: translate(60px, -40px) scale(1.10); }
+        @keyframes drift-3 {
+          0%, 100% { transform: translate(0, 0)              scale(1); }
+          50%      { transform: translate(-30vw, 25vh)       scale(1.15); }
         }
-        @keyframes drift4 {
-          0%, 100% { transform: translate(0, 0)         scale(1); }
-          33%      { transform: translate(-50px, 20px)  scale(0.95); }
-          66%      { transform: translate(30px, -30px)  scale(1.08); }
+        @keyframes drift-4 {
+          0%, 100% { transform: translate(0, 0)              scale(1); }
+          33%      { transform: translate(35vw, -15vh)       scale(0.90); }
+          66%      { transform: translate(20vw, 20vh)        scale(1.10); }
         }
-
-        /* ===== Partículas ===== */
-        .bg-particles {
-          position: absolute;
-          inset: 0;
-          overflow: hidden;
-        }
-        .bg-particle {
-          position: absolute;
-          bottom: -5%;
-          opacity: 0;
-          animation-name: rise;
-          animation-iteration-count: infinite;
-          animation-timing-function: linear;
-          will-change: transform, opacity;
-        }
-        .bg-particle-circle { border-radius: 50%; }
-        .bg-particle-leaf {
-          display: inline-flex;
+        @keyframes drift-5 {
+          0%, 100% { transform: translate(0, 0)              scale(1); }
+          50%      { transform: translate(-20vw, -25vh)      scale(1.20); }
         }
 
-        @keyframes rise {
-          0%   { transform: translate(0,    0)        rotate(0deg);    opacity: 0; }
-          10%  {                                       opacity: 0.5; }
-          50%  { transform: translate(30px, -55vh)    rotate(180deg);  opacity: 0.45; }
-          90%  {                                       opacity: 0.4; }
-          100% { transform: translate(-40px, -110vh)  rotate(360deg);  opacity: 0; }
-        }
-
-        /* ===== Reduced motion ===== */
+        /* ===== Reduced motion: sin animación pero mantenemos colores ===== */
         @media (prefers-reduced-motion: reduce) {
-          .bg-blob { animation: none; }
-          .bg-particle { animation: none; opacity: 0; }
+          .bg-wash, .bg-blob { animation: none; }
         }
 
-        /* En móvil bajamos un poco la intensidad para no consumir bateria */
+        /* ===== Mobile: bajamos blur para mejor performance ===== */
         @media (max-width: 720px) {
-          .bg-blob { opacity: 0.22; filter: blur(50px); }
-          .bg-blob-4 { display: none; }
-          .bg-particle { opacity: 0.3 !important; }
+          .bg-blob { filter: blur(60px); }
+          .bg-blob-blue { display: none; }
+          .bg-blob-coral { display: none; }
         }
       `}</style>
     </div>
