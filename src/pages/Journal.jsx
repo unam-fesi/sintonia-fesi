@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../config/supabaseClient.js';
 import { useStudent } from '../hooks/useStudent.js';
@@ -22,6 +22,7 @@ export default function Journal() {
   const [saving, setSaving] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
   const [suggestLoading, setSuggestLoading] = useState(false);
+  const suggestRef = useRef(null);
 
   useEffect(() => {
     if (!student?.code) {
@@ -31,6 +32,15 @@ export default function Journal() {
     load();
   // eslint-disable-next-line
   }, [student?.code]);
+
+  // Scroll a la sugerencia cuando aparezca
+  useEffect(() => {
+    if (suggestion || suggestLoading) {
+      requestAnimationFrame(() => {
+        suggestRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }, [suggestion, suggestLoading]);
 
   async function load() {
     setLoading(true);
@@ -172,7 +182,7 @@ export default function Journal() {
           </button>
 
           {(suggestLoading || suggestion) && (
-            <div className="suggest-area mt-3">
+            <div className="suggest-area mt-3" ref={suggestRef}>
               {suggestLoading && (
                 <div className="suggest-loading">
                   <div className="spinner small" />
