@@ -288,7 +288,7 @@ function AdminDashboard({ ctx }) {
         </div>
         <div className="health">
           <ConnChip label="Supabase" ok={conn.supabase?.ok} />
-          <ConnChip label="Gemini"   ok={conn.gemini?.ok} />
+          <ConnChip label="Pum-AI"   ok={conn.gemini?.ok} />
         </div>
       </header>
 

@@ -62,8 +62,9 @@ export default function Privacy() {
 
           <h2 className="mt-4">Uso responsable de inteligencia artificial</h2>
           <p>
-            Para redactar la orientación amigable utilizamos un modelo de inteligencia artificial
-            (Gemini de Google). Tomamos las siguientes medidas:
+            Para redactar la orientación amigable utilizamos <strong>Pum-AI</strong>,
+            nuestro asistente basado en modelos de inteligencia artificial.
+            Tomamos las siguientes medidas:
           </p>
           <ul>
             <li>El modelo recibe únicamente <strong>datos agregados</strong>: nivel general, puntajes por dimensión y áreas con más atención.</li>
