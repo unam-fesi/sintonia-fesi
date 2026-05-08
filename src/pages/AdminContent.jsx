@@ -7,6 +7,7 @@ import { supabase } from '../config/supabaseClient.js';
 import { logAudit } from '../services/auditService.js';
 import { DIMENSIONS } from '../data/fallbackQuestions.js';
 import { RESOURCE_TYPES } from '../data/fallbackResources.js';
+import PumAISuggester from '../components/PumAISuggester.jsx';
 
 const TABS = [
   { id: 'questions',       label: 'Preguntas' },
@@ -138,6 +139,18 @@ function QuestionsEditor({ ctx }) {
     });
   }
 
+  function applySuggestion(s) {
+    const order = items.length ? Math.max(...items.map(q => q.sort_order)) + 1 : 1;
+    setEditing('new');
+    setDraft({
+      sort_order: order,
+      dimension: s.dimension || DIMENSIONS[0].id,
+      question_text: s.question_text,
+      is_reverse_scored: !!s.is_reverse_scored,
+      active: true,
+    });
+  }
+
   function startEdit(q) {
     setEditing(q.id);
     setDraft({ ...q });
@@ -180,11 +193,14 @@ function QuestionsEditor({ ctx }) {
 
   return (
     <div className="panel">
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
         <h2>Banco de preguntas ({items.length})</h2>
-        {editing !== 'new' && (
-          <button className="btn btn-primary btn-sm" onClick={startNew}>＋ Nueva</button>
-        )}
+        <div style={{display:'flex',gap:8}}>
+          <PumAISuggester onUse={applySuggestion} />
+          {editing !== 'new' && (
+            <button className="btn btn-primary btn-sm" onClick={startNew}>＋ Nueva</button>
+          )}
+        </div>
       </div>
 
       {editing === 'new' && (
