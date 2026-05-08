@@ -329,8 +329,9 @@ function AdminDashboard({ ctx }) {
           </p>
         </div>
         <div className="health">
-          <ConnChip label="Supabase" ok={conn.supabase?.ok} />
-          <ConnChip label="Pum-AI"   ok={conn.gemini?.ok} />
+          <ConnChip label="Backend" ok={conn.supabase?.ok} />
+          <ConnChip label="BD"      ok={conn.supabase?.ok} />
+          <ConnChip label="Pum-AI"  ok={conn.gemini?.ok} />
         </div>
       </header>
 
@@ -609,7 +610,7 @@ function AdminUsers({ ctx }) {
       setMsg({ type: 'error', text: error.message });
       return;
     }
-    setMsg({ type: 'ok', text: 'Usuario actualizado. Recuerda que también debe existir en Authentication → Users de Supabase.' });
+    setMsg({ type: 'ok', text: 'Usuario actualizado. Recuerda que también debe existir en la sección Authentication → Users del backend.' });
     setForm({ email: '', full_name: '', role: 'analista' });
     load();
   }
@@ -642,7 +643,7 @@ function AdminUsers({ ctx }) {
       <section className="panel">
         <h2>Agregar / actualizar miembro</h2>
         <p className="note">
-          La cuenta debe existir primero en <strong>Authentication → Users</strong> de Supabase
+          La cuenta debe existir primero en <strong>Authentication → Users</strong> del backend
           (con su correo y contraseña). Aquí asignas su rol en el programa.
         </p>
         <form onSubmit={handleAdd} className="user-form mt-2">

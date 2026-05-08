@@ -52,7 +52,7 @@ export default function Privacy() {
 
           <h2 className="mt-4">¿Cómo se almacenan?</h2>
           <p>
-            En infraestructura de Supabase con políticas de Row Level Security activas, lo cual significa que:
+            En servidores seguros con políticas de control de acceso por fila activas, lo cual significa que:
           </p>
           <ul>
             <li>Tus respuestas no son legibles públicamente.</li>

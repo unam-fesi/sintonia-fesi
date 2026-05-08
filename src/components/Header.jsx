@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent.js';
 import './Header.css';
@@ -33,7 +34,7 @@ export default function Header() {
   function closeMobile() { setMobileOpen(false); }
   function handleLogout() {
     setMobileOpen(false);
-    if (confirm('¿Cerrar sesión?\n\nTu código y datos se conservan en Supabase. Solo se borrará tu acceso local — puedes volver con tu código.')) {
+    if (confirm('¿Cerrar sesión?\n\nTu código y datos se conservan en el sistema. Solo se borrará tu acceso local — puedes volver con tu código.')) {
       clearStudent();
       window.location.assign(import.meta.env.BASE_URL);
     }
@@ -156,7 +157,7 @@ export default function Header() {
                     className="logout-link"
                     onClick={() => {
                       setOpenMenu(null);
-                      if (confirm('¿Cerrar sesión?\n\nTu código y datos se conservan en Supabase. Solo se borrará tu acceso local — puedes volver con tu código.')) {
+                      if (confirm('¿Cerrar sesión?\n\nTu código y datos se conservan en el sistema. Solo se borrará tu acceso local — puedes volver con tu código.')) {
                         clearStudent();
                         window.location.assign(import.meta.env.BASE_URL);
                       }
@@ -175,8 +176,8 @@ export default function Header() {
         </nav>
       </div>
 
-      {/* ===== Drawer mobile ===== */}
-      {mobileOpen && (
+      {/* ===== Drawer mobile (portal a body para escapar del sticky header) ===== */}
+      {mobileOpen && createPortal(
         <>
           <div className="mobile-overlay" onClick={closeMobile} />
           <aside className="mobile-drawer" role="dialog" aria-label="Menú principal">
@@ -236,7 +237,8 @@ export default function Header() {
               </div>
             </nav>
           </aside>
-        </>
+        </>,
+        document.body
       )}
     </header>
   );

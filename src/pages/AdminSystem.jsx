@@ -140,7 +140,7 @@ function AlertsConfig({ ctx }) {
       <p className="note">
         Define umbrales para que el sistema notifique cuando demasiadas sesiones llegan a nivel
         prioritario en una ventana de tiempo. (Las notificaciones por email requieren
-        configurar Supabase Functions con SendGrid o similar — Fase 2.)
+        configurar el envío de email del backend con un proveedor SMTP — Fase 2.)
       </p>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:12}}>
