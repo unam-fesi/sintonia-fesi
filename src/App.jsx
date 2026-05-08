@@ -4,6 +4,7 @@ import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import CrisisFAB from './components/CrisisFAB.jsx';
 import WebinarToast from './components/WebinarToast.jsx';
+import WellnessBackground from './components/WellnessBackground.jsx';
 
 // Páginas core eager (camino crítico: home + flujo del test)
 import Home       from './pages/Home.jsx';
@@ -44,8 +45,13 @@ export default function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
+  // Background animado solo en rutas públicas y no durante el test
+  // (durante el test el usuario necesita concentración)
+  const showBg = !isAdminRoute && location.pathname !== '/evaluacion';
+
   return (
     <>
+      {showBg && <WellnessBackground />}
       {!isAdminRoute && <Header />}
       <main>
         <Suspense fallback={<PageFallback />}>

@@ -268,7 +268,7 @@ body.drawer-open .site-header {
   padding: 16px 12px 24px;
   gap: 2px;
 }
-.m-nav a {
+.m-nav a:not(.btn) {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 14px;
   border-radius: 10px;
@@ -277,8 +277,9 @@ body.drawer-open .site-header {
   font-size: 1rem;
   text-decoration: none;
 }
-.m-nav a:hover, .m-nav a.active { background: var(--c-azul-100); }
-.m-nav a.active { color: var(--c-azul-800); font-weight: 700; }
+.m-nav a:not(.btn):hover,
+.m-nav a:not(.btn).active { background: var(--c-azul-100); }
+.m-nav a:not(.btn).active { color: var(--c-azul-800); font-weight: 700; }
 .m-nav h4 {
   font-size: 0.74rem;
   text-transform: uppercase;
