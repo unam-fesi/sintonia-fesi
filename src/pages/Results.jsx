@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import ResultCard from '../components/ResultCard.jsx';
 import DimensionChart from '../components/DimensionChart.jsx';
 import SafetyNotice from '../components/SafetyNotice.jsx';
+import PostTestFeedback from '../components/PostTestFeedback.jsx';
 import { STORAGE_KEYS } from '../utils/constants.js';
 import { getRecommendationsFor } from '../data/fallbackRecommendations.js';
 
@@ -121,6 +122,8 @@ export default function Results() {
             </ul>
           </div>
         )}
+
+        <PostTestFeedback sessionId={result.session_id} />
 
         <div className="results-actions mt-4">
           <button className="btn btn-gold" onClick={copyResult}>📋 Copiar resultado</button>

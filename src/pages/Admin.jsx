@@ -6,6 +6,13 @@ import { checkSupabaseHealth } from '../services/supabaseService.js';
 import { checkOrientationHealth } from '../services/geminiService.js';
 import DimensionBubbles from '../components/DimensionBubbles.jsx';
 import AdminProfile from './AdminProfile.jsx';
+import AdminContent from './AdminContent.jsx';
+import AdminAudit from './AdminAudit.jsx';
+import AdminStats from './AdminStats.jsx';
+import AdminExport from './AdminExport.jsx';
+import AdminSearch from './AdminSearch.jsx';
+import AdminSystem from './AdminSystem.jsx';
+import ThemeToggle from '../components/ThemeToggle.jsx';
 
 const ROLE_LABEL = {
   admin: 'Administrador',
@@ -56,11 +63,29 @@ export default function Admin() {
         <Routes>
           <Route index element={<AdminDashboard ctx={ctx} />} />
           <Route path="perfil" element={<AdminProfile ctx={ctx} onUpdated={refreshCtx} />} />
+          {can(ctx.admin.role, 'view_detail') && (
+            <Route path="sesiones" element={<AdminSessions />} />
+          )}
+          {can(ctx.admin.role, 'manage_content') && (
+            <Route path="contenido" element={<AdminContent ctx={ctx} />} />
+          )}
           {can(ctx.admin.role, 'manage_users') && (
             <Route path="usuarios" element={<AdminUsers ctx={ctx} />} />
           )}
+          {can(ctx.admin.role, 'manage_users') && (
+            <Route path="auditoria" element={<AdminAudit />} />
+          )}
+          {can(ctx.admin.role, 'view_aggregated') && (
+            <Route path="estadisticas" element={<AdminStats />} />
+          )}
+          {can(ctx.admin.role, 'view_aggregated') && (
+            <Route path="exportar" element={<AdminExport ctx={ctx} />} />
+          )}
           {can(ctx.admin.role, 'view_detail') && (
-            <Route path="sesiones" element={<AdminSessions />} />
+            <Route path="buscar" element={<AdminSearch ctx={ctx} />} />
+          )}
+          {ctx.admin.role === 'admin' && (
+            <Route path="sistema" element={<AdminSystem ctx={ctx} />} />
           )}
         </Routes>
       </main>
@@ -203,10 +228,18 @@ function AdminSidebar({ ctx }) {
 
       <nav className="admin-nav">
         <NavLink to="" end>📊 Dashboard</NavLink>
-        {can(r, 'view_detail') && <NavLink to="sesiones">🔍 Sesiones detalladas</NavLink>}
+        {can(r, 'view_aggregated') && <NavLink to="estadisticas">📈 Estadísticas</NavLink>}
+        {can(r, 'view_detail') && <NavLink to="sesiones">🔍 Sesiones</NavLink>}
+        {can(r, 'view_detail') && <NavLink to="buscar">🔎 Buscar por código</NavLink>}
+        {can(r, 'manage_content') && <NavLink to="contenido">📝 Contenido</NavLink>}
+        {can(r, 'view_aggregated') && <NavLink to="exportar">⬇ Exportar</NavLink>}
+        {r === 'admin' && <NavLink to="sistema">⚙ Sistema</NavLink>}
         {can(r, 'manage_users') && <NavLink to="usuarios">👥 Usuarios admin</NavLink>}
+        {can(r, 'manage_users') && <NavLink to="auditoria">🧾 Auditoría</NavLink>}
         <NavLink to="perfil">👤 Mi perfil</NavLink>
       </nav>
+
+      <ThemeToggle />
 
       <button className="logout" onClick={async () => {
         await signOut();

@@ -183,6 +183,46 @@ main { flex: 1; }
   margin: var(--sp-5) 0;
 }
 
+/* ===== Modo oscuro (solo en /admin) ===== */
+[data-theme="dark"] {
+  --c-marfil:    #0F1A29;
+  --c-blanco:    #15243A;
+  --c-texto:     #E8EDF4;
+  --c-texto-soft: #C2CCDA;
+  --c-gris:      #98A4B5;
+  --c-gris-claro:#6B7787;
+  --c-borde:     #2A3A52;
+  --c-borde-soft:#1F2D44;
+  --c-azul-100:  #1A2B43;
+  --c-azul-050:  #15243A;
+}
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at top right, rgba(201,162,39,0.06), transparent 30%),
+    radial-gradient(circle at top left, rgba(143,184,160,0.06), transparent 28%),
+    linear-gradient(180deg, #0A1929 0%, #0F1A29 100%);
+}
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4 { color: var(--c-oro-400); }
+[data-theme="dark"] .panel,
+[data-theme="dark"] .card { background: #15243A; border-color: #2A3A52; }
+[data-theme="dark"] .admin-table th { background: #1A2B43; color: var(--c-oro-400); }
+[data-theme="dark"] .admin-table td { border-color: #1F2D44; }
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .table-wrap,
+[data-theme="dark"] .ds-card,
+[data-theme="dark"] .session-card,
+[data-theme="dark"] .rcard,
+[data-theme="dark"] .resource-card,
+[data-theme="dark"] .info-card { background: #15243A; }
+[data-theme="dark"] .feedback-box { background: #1A2B43; }
+[data-theme="dark"] .audit-item { background: #1A2B43; border-color: #2A3A52; }
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select { background: #1A2B43; color: var(--c-texto); border-color: #2A3A52; }
+
 /* ===== Animaciones ===== */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); }
