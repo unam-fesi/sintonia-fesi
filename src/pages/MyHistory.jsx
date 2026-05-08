@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabaseClient.js';
 import SafetyNotice from '../components/SafetyNotice.jsx';
+import EmotionalAvatar from '../components/EmotionalAvatar.jsx';
 import { setStudent, clearStudent } from '../hooks/useStudent.js';
 
 export default function MyHistory() {
@@ -243,6 +244,21 @@ function HistoryView({ data, code, onLogout }) {
           <button className="btn btn-ghost btn-sm" onClick={onLogout}>Cerrar sesión</button>
         </header>
 
+        <div className="avatar-row mt-3">
+          <EmotionalAvatar code={code} />
+          <div className="quick-actions">
+            <Link to="/check-in" className="btn btn-primary">📝 Check-in semanal</Link>
+            <Link to="/diario" className="btn btn-gold">📔 Diario</Link>
+            <Link to="/companion" className="btn btn-coral">🤝 Hablar con Pum-AI</Link>
+            <Link to="/ruta" className="btn btn-ghost">🛤 Mi ruta</Link>
+            <Link to="/biblioteca" className="btn btn-ghost">📚 Biblioteca</Link>
+            <Link to="/aventura" className="btn btn-ghost">🗺 Aventura</Link>
+            <Link to="/buddy" className="btn btn-ghost">🫂 Buddy</Link>
+            <Link to="/arboles" className="btn btn-ghost">🌳 Mis árboles</Link>
+            <Link to="/calendario" className="btn btn-ghost">📅 Calendario</Link>
+          </div>
+        </div>
+
         <div className="hist-grid mt-3">
           <section className="panel">
             <h2>Evaluaciones ({data.sessions.length})</h2>
@@ -297,6 +313,16 @@ function HistoryView({ data, code, onLogout }) {
       </div>
 
       <style>{`
+        .avatar-row {
+          display: grid;
+          grid-template-columns: 220px 1fr;
+          gap: 18px;
+          align-items: center;
+        }
+        .quick-actions {
+          display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        @media (max-width: 720px) { .avatar-row { grid-template-columns: 1fr; } }
         .hist-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

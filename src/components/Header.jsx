@@ -26,6 +26,8 @@ export default function Header() {
         <nav className="nav" aria-label="Navegación principal">
           <NavLink to="/" end>Inicio</NavLink>
           <NavLink to="/recursos">Recursos</NavLink>
+          <NavLink to="/calendario">Calendario</NavLink>
+          <NavLink to="/mapa">Mapa</NavLink>
           <NavLink to="/apoyo">Apoyo</NavLink>
           <NavLink to="/emociones">Emociones</NavLink>
           {loggedIn ? (

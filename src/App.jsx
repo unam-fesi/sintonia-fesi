@@ -18,6 +18,11 @@ import WellnessRoute from './pages/WellnessRoute.jsx';
 import Companion   from './pages/Companion.jsx';
 import Library     from './pages/Library.jsx';
 import Emotions    from './pages/Emotions.jsx';
+import MapPage     from './pages/MapPage.jsx';
+import Trees       from './pages/Trees.jsx';
+import Buddy       from './pages/Buddy.jsx';
+import Adventure   from './pages/Adventure.jsx';
+import Calendar    from './pages/Calendar.jsx';
 import CrisisFAB   from './components/CrisisFAB.jsx';
 
 export default function App() {
@@ -45,6 +50,11 @@ export default function App() {
           <Route path="/companion"   element={<Companion />} />
           <Route path="/biblioteca"  element={<Library />} />
           <Route path="/emociones"   element={<Emotions />} />
+          <Route path="/mapa"        element={<MapPage />} />
+          <Route path="/arboles"     element={<Trees />} />
+          <Route path="/buddy"       element={<Buddy />} />
+          <Route path="/aventura"    element={<Adventure />} />
+          <Route path="/calendario"  element={<Calendar />} />
 
           {/* Login antes de la ruta protegida; usar rutas anidadas para que Admin
               pueda definir sus subrutas (usuarios, sesiones). */}
