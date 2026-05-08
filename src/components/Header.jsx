@@ -22,10 +22,14 @@ export default function Header() {
     return () => document.removeEventListener('click', handler);
   }, []);
 
-  // Bloquear scroll del body cuando hay drawer abierto
+  // Bloquear scroll del body + flag de drawer abierto
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    document.body.classList.toggle('drawer-open', mobileOpen);
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('drawer-open');
+    };
   }, [mobileOpen]);
 
   function toggle(name) {

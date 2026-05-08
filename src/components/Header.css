@@ -7,6 +7,16 @@
   border-bottom: 1px solid rgba(16,36,62,0.08);
 }
 
+/* Cuando el drawer mobile está abierto, quitamos el backdrop-filter del
+   header para evitar el bug de iOS Safari donde el layer GPU sobrepasa
+   el z-index del overlay */
+body.drawer-open .site-header {
+  backdrop-filter: none;
+  background: transparent;
+  border-bottom: 0;
+  z-index: 1;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -177,9 +187,10 @@
 
 /* ===== Drawer mobile ===== */
 .mobile-overlay {
-  position: fixed; inset: 0;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(10, 25, 41, 0.55);
-  z-index: 99;
+  z-index: 9999;
   animation: fadeIn 0.2s;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -189,11 +200,24 @@
   top: 0; right: 0; bottom: 0;
   width: min(85vw, 360px);
   background: #fff;
-  z-index: 100;
+  z-index: 10000;
   display: flex; flex-direction: column;
   box-shadow: -16px 0 40px rgba(0,0,0,0.25);
   animation: slideRight 0.25s cubic-bezier(.2,.7,.2,1);
   overflow-y: auto;
+  /* iOS height fix */
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+}
+
+/* En pantallas muy chicas el drawer ocupa toda la pantalla */
+@media (max-width: 540px) {
+  .mobile-drawer {
+    width: 100vw;
+    box-shadow: none;
+  }
 }
 @keyframes slideRight {
   from { transform: translateX(100%); }
