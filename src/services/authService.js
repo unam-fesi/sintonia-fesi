@@ -51,17 +51,49 @@ export async function getAdminContext() {
   return { user, admin: data };
 }
 
-// Helpers de permisos
+// Matriz de permisos por rol.
+//   view_aggregated  → KPIs, gráficas, exports, dashboard, advanced
+//   view_detail      → sesiones individuales, búsqueda por código
+//   view_insights    → reportes ejecutivos / cualitativos con Pum-AI
+//   manage_content   → editor de preguntas/recs/recursos/programa
+//   manage_users     → alta/baja admins, ver auditoría
+//   manage_config    → editor del prompt, alertas (Sistema)
+//   manage_security  → Operación (audit search + IPs)
+//   view_teachers_kit→ acceso al kit pedagógico
 export const PERMISSIONS = {
-  admin:        ['view_aggregated','view_detail','manage_users','manage_content','manage_config'],
-  especialista: ['view_aggregated','view_detail'],
-  analista:     ['view_aggregated'],
-  coordinador:  ['view_aggregated','manage_content'],
+  admin: [
+    'view_aggregated','view_detail','view_insights',
+    'manage_users','manage_content','manage_config','manage_security',
+    'view_teachers_kit',
+  ],
+  analista: [
+    'view_aggregated','view_insights',
+    'view_teachers_kit',
+  ],
+  especialista: [
+    'view_aggregated','view_detail','view_insights',
+    'view_teachers_kit',
+  ],
+  coordinador: [
+    'view_aggregated','manage_content',
+    'view_teachers_kit',
+  ],
+  docente: [
+    'view_teachers_kit',
+  ],
 };
 
 export function can(role, permission) {
   return Boolean(PERMISSIONS[role]?.includes(permission));
 }
+
+export const ROLE_LABEL = {
+  admin: 'Administrador',
+  analista: 'Analista',
+  especialista: 'Especialista',
+  coordinador: 'Coordinador',
+  docente: 'Docente',
+};
 
 // Listener para reaccionar a cambios de sesión
 export function onAuthChange(callback) {

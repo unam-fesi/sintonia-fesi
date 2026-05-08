@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, NavLink, Routes, Route } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../config/supabaseClient.js';
-import { getAdminContext, signOut, can } from '../services/authService.js';
+import { getAdminContext, signOut, can, ROLE_LABEL } from '../services/authService.js';
 import { checkSupabaseHealth } from '../services/supabaseService.js';
 import { checkOrientationHealth } from '../services/geminiService.js';
 import DimensionBubbles from '../components/DimensionBubbles.jsx';
@@ -18,13 +18,6 @@ import AdminAdvanced from './AdminAdvanced.jsx';
 import AdminProgram from './AdminProgram.jsx';
 import TeachersKit from './TeachersKit.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
-
-const ROLE_LABEL = {
-  admin: 'Administrador',
-  analista: 'Analista',
-  especialista: 'Especialista',
-  coordinador: 'Coordinador',
-};
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -66,45 +59,23 @@ export default function Admin() {
       <AdminSidebar ctx={ctx} />
       <main className="admin-main">
         <Routes>
-          <Route index element={<AdminDashboard ctx={ctx} />} />
+          {/* Index: docente cae directo en su kit; los demás ven dashboard */}
+          <Route index element={ctx.admin.role === 'docente' ? <TeachersKit /> : <AdminDashboard ctx={ctx} />} />
           <Route path="perfil" element={<AdminProfile ctx={ctx} onUpdated={refreshCtx} />} />
-          {can(ctx.admin.role, 'view_detail') && (
-            <Route path="sesiones" element={<AdminSessions />} />
-          )}
-          {can(ctx.admin.role, 'manage_content') && (
-            <Route path="contenido" element={<AdminContent ctx={ctx} />} />
-          )}
-          {can(ctx.admin.role, 'manage_users') && (
-            <Route path="usuarios" element={<AdminUsers ctx={ctx} />} />
-          )}
-          {can(ctx.admin.role, 'manage_users') && (
-            <Route path="auditoria" element={<AdminAudit />} />
-          )}
-          {can(ctx.admin.role, 'view_aggregated') && (
-            <Route path="estadisticas" element={<AdminStats />} />
-          )}
-          {can(ctx.admin.role, 'view_aggregated') && (
-            <Route path="exportar" element={<AdminExport ctx={ctx} />} />
-          )}
-          {can(ctx.admin.role, 'view_detail') && (
-            <Route path="buscar" element={<AdminSearch ctx={ctx} />} />
-          )}
-          {ctx.admin.role === 'admin' && (
-            <Route path="sistema" element={<AdminSystem ctx={ctx} />} />
-          )}
-          {can(ctx.admin.role, 'view_aggregated') && (
-            <Route path="avanzado" element={<AdminAdvanced />} />
-          )}
-          {can(ctx.admin.role, 'view_aggregated') && (
-            <Route path="insights" element={<AdminInsights />} />
-          )}
-          {ctx.admin.role === 'admin' && (
-            <Route path="operacion" element={<AdminOperations ctx={ctx} />} />
-          )}
-          {can(ctx.admin.role, 'manage_content') && (
-            <Route path="programa" element={<AdminProgram ctx={ctx} />} />
-          )}
-          <Route path="docentes" element={<TeachersKit />} />
+
+          {can(ctx.admin.role, 'view_aggregated') && <Route path="estadisticas" element={<AdminStats />} />}
+          {can(ctx.admin.role, 'view_aggregated') && <Route path="avanzado"     element={<AdminAdvanced />} />}
+          {can(ctx.admin.role, 'view_insights')   && <Route path="insights"     element={<AdminInsights />} />}
+          {can(ctx.admin.role, 'view_detail')     && <Route path="sesiones"     element={<AdminSessions />} />}
+          {can(ctx.admin.role, 'view_detail')     && <Route path="buscar"       element={<AdminSearch ctx={ctx} />} />}
+          {can(ctx.admin.role, 'manage_content')  && <Route path="contenido"    element={<AdminContent ctx={ctx} />} />}
+          {can(ctx.admin.role, 'manage_content')  && <Route path="programa"     element={<AdminProgram ctx={ctx} />} />}
+          {can(ctx.admin.role, 'view_aggregated') && <Route path="exportar"     element={<AdminExport ctx={ctx} />} />}
+          {can(ctx.admin.role, 'manage_config')   && <Route path="sistema"      element={<AdminSystem ctx={ctx} />} />}
+          {can(ctx.admin.role, 'manage_security') && <Route path="operacion"    element={<AdminOperations ctx={ctx} />} />}
+          {can(ctx.admin.role, 'manage_users')    && <Route path="usuarios"     element={<AdminUsers ctx={ctx} />} />}
+          {can(ctx.admin.role, 'manage_users')    && <Route path="auditoria"    element={<AdminAudit />} />}
+          {can(ctx.admin.role, 'view_teachers_kit') && <Route path="docentes"   element={<TeachersKit />} />}
         </Routes>
       </main>
 
@@ -245,20 +216,28 @@ function AdminSidebar({ ctx }) {
       </NavLink>
 
       <nav className="admin-nav">
-        <NavLink to="" end>📊 Dashboard</NavLink>
+        {r !== 'docente' && <NavLink to="" end>📊 Dashboard</NavLink>}
+
         {can(r, 'view_aggregated') && <NavLink to="estadisticas">📈 Estadísticas</NavLink>}
         {can(r, 'view_aggregated') && <NavLink to="avanzado">🧠 Análisis avanzado</NavLink>}
-        {can(r, 'view_aggregated') && <NavLink to="insights">✨ Pum-AI Insights</NavLink>}
-        {can(r, 'view_detail') && <NavLink to="sesiones">🔍 Sesiones</NavLink>}
-        {can(r, 'view_detail') && <NavLink to="buscar">🔎 Buscar por código</NavLink>}
-        {can(r, 'manage_content') && <NavLink to="contenido">📝 Contenido</NavLink>}
-        {can(r, 'manage_content') && <NavLink to="programa">🌱 Programa</NavLink>}
+        {can(r, 'view_insights')   && <NavLink to="insights">✨ Pum-AI Insights</NavLink>}
+
+        {can(r, 'view_detail')     && <NavLink to="sesiones">🔍 Sesiones</NavLink>}
+        {can(r, 'view_detail')     && <NavLink to="buscar">🔎 Buscar por código</NavLink>}
+
+        {can(r, 'manage_content')  && <NavLink to="contenido">📝 Contenido</NavLink>}
+        {can(r, 'manage_content')  && <NavLink to="programa">🌱 Programa</NavLink>}
+
         {can(r, 'view_aggregated') && <NavLink to="exportar">⬇ Exportar</NavLink>}
-        {r === 'admin' && <NavLink to="sistema">⚙ Sistema</NavLink>}
-        {r === 'admin' && <NavLink to="operacion">🔒 Operación</NavLink>}
-        {can(r, 'manage_users') && <NavLink to="usuarios">👥 Usuarios admin</NavLink>}
-        {can(r, 'manage_users') && <NavLink to="auditoria">🧾 Auditoría</NavLink>}
-        <NavLink to="docentes">📚 Kit docente</NavLink>
+
+        {can(r, 'manage_config')   && <NavLink to="sistema">⚙ Sistema</NavLink>}
+        {can(r, 'manage_security') && <NavLink to="operacion">🔒 Operación</NavLink>}
+
+        {can(r, 'manage_users')    && <NavLink to="usuarios">👥 Usuarios admin</NavLink>}
+        {can(r, 'manage_users')    && <NavLink to="auditoria">🧾 Auditoría</NavLink>}
+
+        {can(r, 'view_teachers_kit') && <NavLink to="docentes" end={r === 'docente'}>📚 Kit docente</NavLink>}
+
         <NavLink to="perfil">👤 Mi perfil</NavLink>
       </nav>
 
@@ -471,11 +450,12 @@ function AdminDashboard({ ctx }) {
 
 function permissionsDescription(role) {
   switch (role) {
-    case 'admin':       return 'control total: gestión de usuarios, contenido y todas las métricas';
-    case 'especialista': return 'detalle de sesiones individuales y métricas agregadas';
-    case 'analista':    return 'métricas agregadas y modelo dimensional';
-    case 'coordinador': return 'gestión de contenido (recursos, recomendaciones)';
-    default:            return 'el panel administrativo';
+    case 'admin':        return 'control total: gestión de usuarios, contenido, sistema, operación y todas las métricas';
+    case 'especialista': return 'detalle de sesiones individuales, búsqueda por código, métricas agregadas e insights de Pum-AI';
+    case 'analista':     return 'métricas agregadas, análisis avanzado e insights de Pum-AI (sin acceso individual)';
+    case 'coordinador':  return 'gestión de contenido y programa (preguntas, recursos, eventos, árboles, etc.) + métricas agregadas';
+    case 'docente':      return 'el kit pedagógico para acompañar a tus estudiantes';
+    default:             return 'el panel administrativo';
   }
 }
 
