@@ -14,7 +14,6 @@ export const isSupabaseConfigured = Boolean(url && anonKey);
 export const supabase = isSupabaseConfigured
   ? createClient(url, anonKey, {
       auth: { persistSession: false }, // Sin sesión en flujo público
-      global: { headers: { 'x-sintonia-app': 'web' } },
     })
   : null;
 
