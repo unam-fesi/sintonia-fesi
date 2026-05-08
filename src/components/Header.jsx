@@ -27,11 +27,14 @@ export default function Header() {
           <NavLink to="/" end>Inicio</NavLink>
           <NavLink to="/recursos">Recursos</NavLink>
           <NavLink to="/apoyo">Apoyo</NavLink>
+          <NavLink to="/emociones">Emociones</NavLink>
           {loggedIn ? (
             <>
+              <NavLink to="/companion">🤝 Pum-AI</NavLink>
               <NavLink to="/check-in">Check-in</NavLink>
               <NavLink to="/diario">Diario</NavLink>
               <NavLink to="/ruta">Mi ruta</NavLink>
+              <NavLink to="/biblioteca">Biblioteca</NavLink>
               <NavLink to="/mi-historia">Mi historia</NavLink>
             </>
           ) : (

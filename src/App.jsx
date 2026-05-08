@@ -15,6 +15,10 @@ import CheckIn    from './pages/CheckIn.jsx';
 import Journal    from './pages/Journal.jsx';
 import Support    from './pages/Support.jsx';
 import WellnessRoute from './pages/WellnessRoute.jsx';
+import Companion   from './pages/Companion.jsx';
+import Library     from './pages/Library.jsx';
+import Emotions    from './pages/Emotions.jsx';
+import CrisisFAB   from './components/CrisisFAB.jsx';
 
 export default function App() {
   const location = useLocation();
@@ -38,6 +42,9 @@ export default function App() {
           <Route path="/diario"      element={<Journal />} />
           <Route path="/apoyo"       element={<Support />} />
           <Route path="/ruta"        element={<WellnessRoute />} />
+          <Route path="/companion"   element={<Companion />} />
+          <Route path="/biblioteca"  element={<Library />} />
+          <Route path="/emociones"   element={<Emotions />} />
 
           {/* Login antes de la ruta protegida; usar rutas anidadas para que Admin
               pueda definir sus subrutas (usuarios, sesiones). */}
@@ -48,6 +55,7 @@ export default function App() {
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <CrisisFAB />}
     </>
   );
 }

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Hero from '../components/Hero.jsx';
 import InfoCard from '../components/InfoCard.jsx';
 import SafetyNotice from '../components/SafetyNotice.jsx';
+import { DailyQuote, DailyChallenge } from '../components/DailyContent.jsx';
 
 const PILLARS = [
   { icon: '📝', accent: 'azul',    title: 'Evaluación breve',
@@ -20,6 +21,20 @@ export default function Home() {
   return (
     <>
       <Hero />
+
+      <section className="section-sm">
+        <div className="container" style={{maxWidth: 980}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+            <DailyQuote />
+            <DailyChallenge />
+          </div>
+          <style>{`
+            @media (max-width: 720px) {
+              .section-sm > .container > div { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
+        </div>
+      </section>
 
       <section className="section">
         <div className="container">
