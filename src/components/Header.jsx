@@ -4,10 +4,10 @@ import { useStudent } from '../hooks/useStudent.js';
 import './Header.css';
 
 export default function Header() {
-  const { student } = useStudent();
+  const { student, clearStudent } = useStudent();
   const loggedIn = !!student?.code;
   const location = useLocation();
-  const [openMenu, setOpenMenu] = useState(null); // 'discover' | 'mine' | null
+  const [openMenu, setOpenMenu] = useState(null); // 'discover' | 'mine' | 'user' | null
   const navRef = useRef(null);
 
   // Cierra menús al cambiar de ruta o click fuera
@@ -104,10 +104,39 @@ export default function Header() {
           <NavLink to="/privacidad" className="nav-link nav-tiny">Privacidad</NavLink>
 
           {loggedIn ? (
-            <Link to="/mi-historia" className="user-chip" title={`Tu código: ${student.code}`}>
-              <span className="initials">{initials}</span>
-              <small>{student.code}</small>
-            </Link>
+            <div className="dropdown">
+              <button
+                type="button"
+                className={`user-chip ${openMenu === 'user' ? 'active' : ''}`}
+                onClick={() => toggle('user')}
+                aria-haspopup="true"
+                aria-expanded={openMenu === 'user'}
+                title={`Tu código: ${student.code}`}
+              >
+                <span className="initials">{initials}</span>
+                <small>{student.code} ▾</small>
+              </button>
+              {openMenu === 'user' && (
+                <div className="drop-panel">
+                  <NavLink to="/mi-historia">📊 Mi historia</NavLink>
+                  <NavLink to="/check-in">📝 Check-in</NavLink>
+                  <NavLink to="/diario">📔 Diario</NavLink>
+                  <hr style={{margin:'4px 0', border:0, borderTop:'1px solid var(--c-borde-soft)'}} />
+                  <button
+                    type="button"
+                    className="logout-link"
+                    onClick={() => {
+                      if (confirm('¿Cerrar sesión? Tu código y datos se conservan en Supabase, solo se borrará tu acceso local.')) {
+                        clearStudent();
+                        window.location.assign(import.meta.env.BASE_URL);
+                      }
+                    }}
+                  >
+                    ↩ Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <Link to="/consentimiento" className="btn btn-primary btn-sm nav-cta">
               Iniciar orientación

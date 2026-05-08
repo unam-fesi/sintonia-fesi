@@ -120,7 +120,23 @@
   text-decoration: none;
   transition: transform 0.18s;
 }
+.user-chip { cursor: pointer; border: none; font-family: inherit; }
 .user-chip:hover { transform: translateY(-1px); }
+.user-chip.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.4); }
+.drop-panel .logout-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.94rem;
+  font-weight: 500;
+  color: #93362A;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.drop-panel .logout-link:hover { background: var(--c-coral-100); }
 .user-chip .initials {
   width: 30px; height: 30px;
   border-radius: 50%;

@@ -91,8 +91,24 @@ export default function MyHistory() {
       </section>
     );
   }
+  async function goToPanel() {
+    setStep('loading'); setErr(null);
+    try {
+      const { data: hist, error } = await supabase.functions.invoke('anon-auth', {
+        body: { action: 'history', anonymous_code: code, password: password || '' },
+      });
+      if (error) throw error;
+      if (hist?.error) throw new Error(hist.error);
+      setData(hist);
+      setStep('history');
+    } catch (e) {
+      setErr(e.message);
+      setStep('login');
+    }
+  }
+
   if (step === 'history' && data) return <HistoryView data={data} code={code} onLogout={() => { clearStudent(); setStep('login'); setData(null); setCode(''); setPassword(''); }} />;
-  if (step === 'registered') return <RegisteredOk code={code} />;
+  if (step === 'registered') return <RegisteredOk code={code} onContinue={goToPanel} />;
   if (step === 'register') return <RegisterForm onRegister={register} onCancel={() => setStep('login')} loading={loading} err={err} />;
 
   return (
@@ -233,7 +249,7 @@ function RegisterForm({ onRegister, onCancel, loading, err }) {
   );
 }
 
-function RegisteredOk({ code }) {
+function RegisteredOk({ code, onContinue }) {
   return (
     <section className="section">
       <div className="container" style={{maxWidth: 520}}>
@@ -257,7 +273,7 @@ function RegisteredOk({ code }) {
             <strong>¡Guárdalo en un lugar seguro!</strong> Sin él (y la contraseña que pusiste)
             no podrás recuperar tu histórico. No lo recuperamos por ti — es tu garantía de anonimato.
           </SafetyNotice>
-          <Link to="/mi-historia" className="btn btn-primary mt-3">Ir a mi panel</Link>
+          <button className="btn btn-primary mt-3" onClick={onContinue}>Ir a mi panel →</button>
         </div>
       </div>
     </section>

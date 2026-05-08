@@ -39,13 +39,13 @@ export default function AdminLogin() {
   return (
     <section className="login-shell">
       <div className="login-card">
-        <div className="login-mark">
-          <svg width="34" height="34" viewBox="0 0 30 30" fill="none">
-            <path d="M3 18 C 7 8, 12 8, 15 18 S 23 28, 27 18"
-                  stroke="#C9A227" strokeWidth="2.4" strokeLinecap="round" fill="none"/>
-            <circle cx="15" cy="6" r="2.2" fill="#C9A227"/>
-          </svg>
-        </div>
+        <img
+          src={`${import.meta.env.BASE_URL}Sintonia-icon192.png`}
+          srcSet={`${import.meta.env.BASE_URL}Sintonia-icon192.png 1x, ${import.meta.env.BASE_URL}Sintonia-icon512.png 2x`}
+          alt="Sintonía UNAM"
+          className="login-mark"
+          width="72" height="72"
+        />
         <h1>Acceso interno</h1>
         <p className="lede text-center">Panel administrativo · Sintonía UNAM</p>
 
@@ -113,11 +113,12 @@ export default function AdminLogin() {
           box-shadow: 0 30px 80px rgba(0,0,0,0.35);
         }
         .login-mark {
-          width: 64px; height: 64px;
+          width: 72px; height: 72px;
           border-radius: 18px;
-          background: linear-gradient(135deg, var(--c-azul-800), var(--c-azul-700));
-          display: grid; place-items: center;
+          object-fit: cover;
+          display: block;
           margin: 0 auto 16px;
+          box-shadow: var(--sh-md);
         }
         .login-card h1 {
           text-align: center;

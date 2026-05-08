@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, NavLink, Routes, Route } from 'react-router-dom';
+import { useNavigate, NavLink, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../config/supabaseClient.js';
 import { getAdminContext, signOut, can, ROLE_LABEL } from '../services/authService.js';
 import { checkSupabaseHealth } from '../services/supabaseService.js';
@@ -16,8 +16,10 @@ import AdminInsights from './AdminInsights.jsx';
 import AdminOperations from './AdminOperations.jsx';
 import AdminAdvanced from './AdminAdvanced.jsx';
 import AdminProgram from './AdminProgram.jsx';
+import AdminAnonymous from './AdminAnonymous.jsx';
 import TeachersKit from './TeachersKit.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
+import RoleGuard from '../components/RoleGuard.jsx';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -63,19 +65,23 @@ export default function Admin() {
           <Route index element={ctx.admin.role === 'docente' ? <TeachersKit /> : <AdminDashboard ctx={ctx} />} />
           <Route path="perfil" element={<AdminProfile ctx={ctx} onUpdated={refreshCtx} />} />
 
-          {can(ctx.admin.role, 'view_aggregated') && <Route path="estadisticas" element={<AdminStats />} />}
-          {can(ctx.admin.role, 'view_aggregated') && <Route path="avanzado"     element={<AdminAdvanced />} />}
-          {can(ctx.admin.role, 'view_insights')   && <Route path="insights"     element={<AdminInsights />} />}
-          {can(ctx.admin.role, 'view_detail')     && <Route path="sesiones"     element={<AdminSessions />} />}
-          {can(ctx.admin.role, 'view_detail')     && <Route path="buscar"       element={<AdminSearch ctx={ctx} />} />}
-          {can(ctx.admin.role, 'manage_content')  && <Route path="contenido"    element={<AdminContent ctx={ctx} />} />}
-          {can(ctx.admin.role, 'manage_content')  && <Route path="programa"     element={<AdminProgram ctx={ctx} />} />}
-          {can(ctx.admin.role, 'view_aggregated') && <Route path="exportar"     element={<AdminExport ctx={ctx} />} />}
-          {can(ctx.admin.role, 'manage_config')   && <Route path="sistema"      element={<AdminSystem ctx={ctx} />} />}
-          {can(ctx.admin.role, 'manage_security') && <Route path="operacion"    element={<AdminOperations ctx={ctx} />} />}
-          {can(ctx.admin.role, 'manage_users')    && <Route path="usuarios"     element={<AdminUsers ctx={ctx} />} />}
-          {can(ctx.admin.role, 'manage_users')    && <Route path="auditoria"    element={<AdminAudit />} />}
-          {can(ctx.admin.role, 'view_teachers_kit') && <Route path="docentes"   element={<TeachersKit />} />}
+          <Route path="estadisticas" element={<RoleGuard ctx={ctx} permission="view_aggregated"><AdminStats /></RoleGuard>} />
+          <Route path="avanzado"     element={<RoleGuard ctx={ctx} permission="view_aggregated"><AdminAdvanced /></RoleGuard>} />
+          <Route path="insights"     element={<RoleGuard ctx={ctx} permission="view_insights"><AdminInsights /></RoleGuard>} />
+          <Route path="sesiones"     element={<RoleGuard ctx={ctx} permission="view_detail"><AdminSessions /></RoleGuard>} />
+          <Route path="buscar"       element={<RoleGuard ctx={ctx} permission="view_detail"><AdminSearch ctx={ctx} /></RoleGuard>} />
+          <Route path="anonimos"     element={<RoleGuard ctx={ctx} permission="view_detail"><AdminAnonymous ctx={ctx} /></RoleGuard>} />
+          <Route path="contenido"    element={<RoleGuard ctx={ctx} permission="manage_content"><AdminContent ctx={ctx} /></RoleGuard>} />
+          <Route path="programa"     element={<RoleGuard ctx={ctx} permission="manage_content"><AdminProgram ctx={ctx} /></RoleGuard>} />
+          <Route path="exportar"     element={<RoleGuard ctx={ctx} permission="view_aggregated"><AdminExport ctx={ctx} /></RoleGuard>} />
+          <Route path="sistema"      element={<RoleGuard ctx={ctx} permission="manage_config"><AdminSystem ctx={ctx} /></RoleGuard>} />
+          <Route path="operacion"    element={<RoleGuard ctx={ctx} permission="manage_security"><AdminOperations ctx={ctx} /></RoleGuard>} />
+          <Route path="usuarios"     element={<RoleGuard ctx={ctx} permission="manage_users"><AdminUsers ctx={ctx} /></RoleGuard>} />
+          <Route path="auditoria"    element={<RoleGuard ctx={ctx} permission="manage_users"><AdminAudit /></RoleGuard>} />
+          <Route path="docentes"     element={<RoleGuard ctx={ctx} permission="view_teachers_kit"><TeachersKit /></RoleGuard>} />
+
+          {/* Catch-all dentro de admin: redirige al index del rol */}
+          <Route path="*" element={<Navigate to="" replace />} />
         </Routes>
       </main>
 
@@ -223,6 +229,7 @@ function AdminSidebar({ ctx }) {
         {can(r, 'view_insights')   && <NavLink to="insights">✨ Pum-AI Insights</NavLink>}
 
         {can(r, 'view_detail')     && <NavLink to="sesiones">🔍 Sesiones</NavLink>}
+        {can(r, 'view_detail')     && <NavLink to="anonimos">👥 Usuarios anónimos</NavLink>}
         {can(r, 'view_detail')     && <NavLink to="buscar">🔎 Buscar por código</NavLink>}
 
         {can(r, 'manage_content')  && <NavLink to="contenido">📝 Contenido</NavLink>}
