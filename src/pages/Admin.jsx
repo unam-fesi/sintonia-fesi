@@ -580,8 +580,9 @@ function AdminSessions() {
 function AdminUsers({ ctx }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ email: '', full_name: '', role: 'analista' });
+  const [form, setForm] = useState({ email: '', full_name: '', role: 'analista', password: '' });
   const [msg, setMsg] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -595,24 +596,72 @@ function AdminUsers({ ctx }) {
 
   useEffect(() => { load(); }, []);
 
+  function generatePassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    const symbols = '!@#$%&*';
+    const rand = new Uint32Array(14);
+    crypto.getRandomValues(rand);
+    let pw = '';
+    for (let i = 0; i < 14; i++) pw += chars[rand[i] % chars.length];
+    pw += symbols[rand[0] % symbols.length];
+    setForm(f => ({ ...f, password: pw }));
+  }
+
   async function handleAdd(e) {
     e.preventDefault();
-    setMsg(null);
-    const { error } = await supabase
-      .from('admin_users')
-      .upsert({
-        email: form.email.trim(),
-        full_name: form.full_name.trim(),
-        role: form.role,
-        active: true,
-      }, { onConflict: 'email' });
-    if (error) {
-      setMsg({ type: 'error', text: error.message });
-      return;
+    setMsg(null); setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email: form.email.trim(),
+          full_name: form.full_name.trim(),
+          role: form.role,
+          password: form.password || undefined,
+        },
+      });
+      if (error || data?.error) {
+        let detail = data?.error || error.message;
+        try {
+          if (error?.context?.json) {
+            const b = await error.context.json();
+            detail = b.error || detail;
+          }
+        } catch { /* */ }
+        throw new Error(detail);
+      }
+      setMsg({
+        type: 'ok',
+        text: `✓ ${form.email} ${data.password_set ? '(con contraseña)' : ''} guardado como ${form.role}.`
+      });
+      setForm({ email: '', full_name: '', role: 'analista', password: '' });
+      load();
+    } catch (e) {
+      setMsg({ type: 'error', text: e.message });
+    } finally {
+      setBusy(false);
     }
-    setMsg({ type: 'ok', text: 'Usuario actualizado. Recuerda que también debe existir en la sección Authentication → Users del backend.' });
-    setForm({ email: '', full_name: '', role: 'analista' });
-    load();
+  }
+
+  async function resetPassword(u) {
+    const newPw = prompt(`Nueva contraseña para ${u.email}\n(mínimo 8 caracteres, deja vacío para cancelar)`);
+    if (!newPw || newPw.length < 8) return;
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email: u.email,
+          full_name: u.full_name || '',
+          role: u.role,
+          password: newPw,
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error.message);
+      setMsg({ type: 'ok', text: `✓ Contraseña actualizada para ${u.email}` });
+    } catch (e) {
+      setMsg({ type: 'error', text: e.message });
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function setRole(id, role) {
@@ -643,8 +692,9 @@ function AdminUsers({ ctx }) {
       <section className="panel">
         <h2>Agregar / actualizar miembro</h2>
         <p className="note">
-          La cuenta debe existir primero en <strong>Authentication → Users</strong> del backend
-          (con su correo y contraseña). Aquí asignas su rol en el programa.
+          Crea el usuario completo (autenticación + rol) en una sola pasada. Si ya existe un usuario con ese
+          correo, solo se actualizará rol/nombre. Para cambiar contraseña a un usuario existente,
+          usa el botón 🔑 en la tabla de abajo.
         </p>
         <form onSubmit={handleAdd} className="user-form mt-2">
           <div className="field">
@@ -664,10 +714,23 @@ function AdminUsers({ ctx }) {
               <option value="analista">Analista</option>
               <option value="especialista">Especialista</option>
               <option value="coordinador">Coordinador</option>
+              <option value="docente">Docente</option>
               <option value="admin">Administrador</option>
             </select>
           </div>
-          <button className="btn btn-primary" type="submit">Guardar</button>
+          <div className="field pw-field">
+            <label>Contraseña inicial</label>
+            <div className="pw-input">
+              <input type="text" value={form.password}
+                onChange={e => setForm(f => ({...f, password: e.target.value}))}
+                placeholder="mínimo 8 chars" minLength={8} />
+              <button type="button" className="btn btn-ghost btn-sm" onClick={generatePassword}>🎲 Generar</button>
+            </div>
+            <small className="note">Obligatoria si el usuario es nuevo. Opcional si ya existe.</small>
+          </div>
+          <button className="btn btn-primary" type="submit" disabled={busy}>
+            {busy ? 'Guardando…' : 'Guardar'}
+          </button>
         </form>
         {msg && (
           <p className={`feedback ${msg.type}`}>{msg.text}</p>
@@ -680,11 +743,11 @@ function AdminUsers({ ctx }) {
           <div className="table-wrap mt-2">
             <table className="admin-table">
               <thead>
-                <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Activo</th><th></th></tr>
+                <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Activo</th><th>Último acceso</th><th></th></tr>
               </thead>
               <tbody>
                 {users.length === 0 ? (
-                  <tr><td colSpan={5} className="note text-center">Aún no hay miembros.</td></tr>
+                  <tr><td colSpan={6} className="note text-center">Aún no hay miembros.</td></tr>
                 ) : users.map(u => (
                   <tr key={u.id}>
                     <td><strong>{u.full_name || '—'}</strong></td>
@@ -698,6 +761,7 @@ function AdminUsers({ ctx }) {
                         <option value="analista">Analista</option>
                         <option value="especialista">Especialista</option>
                         <option value="coordinador">Coordinador</option>
+                        <option value="docente">Docente</option>
                         <option value="admin">Administrador</option>
                       </select>
                     </td>
@@ -713,6 +777,15 @@ function AdminUsers({ ctx }) {
                       </label>
                     </td>
                     <td><small className="note">{u.last_access ? new Date(u.last_access).toLocaleString('es-MX') : 'Sin acceso aún'}</small></td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => resetPassword(u)}
+                        disabled={busy || u.id === ctx.admin.id}
+                        title="Resetear contraseña"
+                      >🔑</button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -724,10 +797,15 @@ function AdminUsers({ ctx }) {
       <style>{`
         .user-form {
           display: grid;
-          grid-template-columns: 2fr 2fr 1.2fr auto;
+          grid-template-columns: 1.4fr 1.4fr 1fr 1.6fr auto;
           gap: 12px;
           align-items: end;
         }
+        .pw-field { grid-column: span 1; }
+        .pw-input { display: flex; gap: 6px; align-items: stretch; }
+        .pw-input input { flex: 1; }
+        .pw-input .btn { white-space: nowrap; }
+
         .feedback {
           padding: 10px 14px;
           border-radius: 12px;
@@ -738,7 +816,11 @@ function AdminUsers({ ctx }) {
         .feedback.error { background: var(--c-coral-100); color: #93362A; }
         .toggle { display: inline-flex; align-items: center; gap: 6px; }
 
-        @media (max-width: 880px) {
+        @media (max-width: 1100px) {
+          .user-form { grid-template-columns: 1fr 1fr; }
+          .pw-field { grid-column: 1 / -1; }
+        }
+        @media (max-width: 600px) {
           .user-form { grid-template-columns: 1fr; }
         }
       `}</style>
