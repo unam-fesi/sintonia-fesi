@@ -10,6 +10,7 @@ import { logAudit } from '../services/auditService.js';
 const TABS = [
   { id: 'trees',     label: '🌳 Árboles' },
   { id: 'events',    label: '📅 Eventos' },
+  { id: 'webinars',  label: '📡 Webinars' },
   { id: 'hunts',     label: '🗺 Treasure Hunts' },
   { id: 'library',   label: '📚 Biblioteca' },
   { id: 'specialists', label: '🩺 Especialistas' },
@@ -37,6 +38,7 @@ export default function AdminProgram({ ctx }) {
       <div className="mt-3">
         {tab === 'trees'       && <TreesAdmin ctx={ctx} />}
         {tab === 'events'      && <EventsAdmin ctx={ctx} />}
+        {tab === 'webinars'    && <WebinarsAdmin ctx={ctx} />}
         {tab === 'hunts'       && <HuntsAdmin ctx={ctx} />}
         {tab === 'library'     && <LibraryAdmin ctx={ctx} />}
         {tab === 'specialists' && <SpecialistsAdmin ctx={ctx} />}
@@ -135,6 +137,123 @@ function tsLocal(v) {
   if (isNaN(d)) return '';
   const off = d.getTimezoneOffset();
   return new Date(d.getTime() - off*60000).toISOString().slice(0,16);
+}
+
+// =============================================================
+// WEBINARS (filtra wellness_events por category='webinar')
+// =============================================================
+function WebinarsAdmin({ ctx }) {
+  const [items, setItems] = useState([]);
+  const [editing, setEditing] = useState(null);
+  const [draft, setDraft] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase.from('wellness_events')
+      .select('*').eq('category', 'webinar').order('starts_at', { ascending: false });
+    setItems(data || []);
+    setLoading(false);
+  }
+  useEffect(() => { load(); }, []);
+
+  function startNew() {
+    setEditing('new');
+    setDraft({
+      title: '', description: '', speaker: '', category: 'webinar',
+      starts_at: '', ends_at: '', location: 'En línea',
+      url: '', image_url: '', capacity: '', is_featured: true, active: true,
+    });
+  }
+  function startEdit(w) { setEditing(w.id); setDraft({...w}); }
+
+  async function save() {
+    const payload = {
+      ...draft,
+      category: 'webinar',
+      capacity: draft.capacity === '' ? null : Number(draft.capacity),
+      starts_at: draft.starts_at || null,
+      ends_at: draft.ends_at || null,
+    };
+    if (editing === 'new') {
+      const { data, error } = await supabase.from('wellness_events').insert(payload).select().single();
+      if (error) return alert(error.message);
+      await logAudit({ ctx, action: 'create', entity: 'webinars', entity_id: data.id, after_data: data });
+    } else {
+      const before = items.find(i => i.id === editing);
+      const { error } = await supabase.from('wellness_events').update(payload).eq('id', editing);
+      if (error) return alert(error.message);
+      await logAudit({ ctx, action: 'update', entity: 'webinars', entity_id: editing, before_data: before, after_data: payload });
+    }
+    setEditing(null); setDraft({}); load();
+  }
+
+  async function remove(w) {
+    if (!confirm(`¿Eliminar webinar "${w.title}"?`)) return;
+    await supabase.from('wellness_events').delete().eq('id', w.id);
+    await logAudit({ ctx, action: 'delete', entity: 'webinars', entity_id: w.id, before_data: w });
+    load();
+  }
+
+  if (loading) return <div className="spinner" style={{margin:'24px auto'}} />;
+
+  return (
+    <section className="panel">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+        <h2>Webinars ({items.length})</h2>
+        <button className="btn btn-primary btn-sm" onClick={startNew}>＋ Nuevo webinar</button>
+      </div>
+      <p className="note">
+        Los webinars activos próximos aparecerán como notificación flotante en el sitio público.
+        El más cercano se muestra primero.
+      </p>
+
+      {(editing === 'new' || editing) && (
+        <div className="edit-area mt-3">
+          <div className="grid-form">
+            <div className="field" style={{gridColumn:'1/-1'}}><label>Título</label>
+              <input value={draft.title||''} onChange={e=>setDraft({...draft, title:e.target.value})} placeholder="ej. Manejo del estrés en exámenes finales" />
+            </div>
+            <div className="field"><label>Ponente</label><input value={draft.speaker||''} onChange={e=>setDraft({...draft, speaker:e.target.value})} placeholder="Mtro. Juan Pérez" /></div>
+            <div className="field"><label>Capacidad</label><input type="number" value={draft.capacity||''} onChange={e=>setDraft({...draft, capacity:e.target.value})} /></div>
+            <div className="field"><label>Inicia</label><input type="datetime-local" value={tsLocal(draft.starts_at)} onChange={e=>setDraft({...draft, starts_at:e.target.value})} /></div>
+            <div className="field"><label>Termina</label><input type="datetime-local" value={tsLocal(draft.ends_at)} onChange={e=>setDraft({...draft, ends_at:e.target.value})} /></div>
+            <div className="field"><label>Ubicación / Plataforma</label><input value={draft.location||''} onChange={e=>setDraft({...draft, location:e.target.value})} placeholder="Zoom, presencial, etc." /></div>
+            <div className="field"><label>URL de inscripción</label><input value={draft.url||''} onChange={e=>setDraft({...draft, url:e.target.value})} placeholder="https://..." /></div>
+            <div className="field" style={{gridColumn:'1/-1'}}><label>URL de imagen (banner del toast)</label><input value={draft.image_url||''} onChange={e=>setDraft({...draft, image_url:e.target.value})} placeholder="https://..." /></div>
+            <div className="field" style={{gridColumn:'1/-1'}}><label>Descripción</label><textarea rows={3} value={draft.description||''} onChange={e=>setDraft({...draft, description:e.target.value})} /></div>
+            <div className="field"><label>Activo</label><select value={draft.active?'1':'0'} onChange={e=>setDraft({...draft, active:e.target.value==='1'})}><option value="1">Sí</option><option value="0">No</option></select></div>
+            <div className="field"><label>Destacado (toast)</label><select value={draft.is_featured?'1':'0'} onChange={e=>setDraft({...draft, is_featured:e.target.value==='1'})}><option value="1">Sí</option><option value="0">No</option></select></div>
+          </div>
+          {draft.image_url && <img src={draft.image_url} alt="preview" style={{maxWidth: 240, height: 'auto', borderRadius: 12, marginTop: 12}} />}
+          <div style={{display:'flex',gap:8,marginTop:12}}>
+            <button className="btn btn-primary btn-sm" onClick={save}>✓ Guardar</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => { setEditing(null); setDraft({}); }}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      <div className="cards-grid mt-3">
+        {items.map(w => (
+          <article key={w.id} className="rcard">
+            {w.image_url && <img src={w.image_url} alt="" style={{width:'100%',height:120,objectFit:'cover',borderRadius:12,marginBottom:8}} />}
+            <span className="tag">📡 Webinar</span>
+            <h3 className="mt-2">{w.title}</h3>
+            {w.speaker && <small>👤 {w.speaker}</small>}
+            <small>🗓 {w.starts_at ? new Date(w.starts_at).toLocaleString('es-MX') : '—'}</small>
+            {w.location && <small>📍 {w.location}</small>}
+            {w.description && <p className="note">{w.description}</p>}
+            <div className="actions-cell mt-2">
+              <button className="icon-btn" onClick={() => startEdit(w)}>✎ Editar</button>
+              <button className="icon-btn danger" onClick={() => remove(w)}>🗑</button>
+              <span style={{marginLeft:'auto',padding:'4px 8px',background: w.active ? 'var(--c-salvia-100)' : 'var(--c-coral-100)',borderRadius:8,fontSize:'0.78rem',fontWeight:700}}>{w.active ? 'Activo' : 'Inactivo'}</span>
+            </div>
+          </article>
+        ))}
+        {items.length === 0 && <p className="note text-center" style={{gridColumn:'1/-1'}}>Aún no hay webinars. Crea el primero.</p>}
+      </div>
+    </section>
+  );
 }
 
 // =============================================================

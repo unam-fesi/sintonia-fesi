@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import CrisisFAB from './components/CrisisFAB.jsx';
+import WebinarToast from './components/WebinarToast.jsx';
 
 // Páginas core eager (camino crítico: home + flujo del test)
 import Home       from './pages/Home.jsx';
@@ -80,6 +81,7 @@ export default function App() {
       </main>
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <CrisisFAB />}
+      {!isAdminRoute && <WebinarToast />}
     </>
   );
 }
