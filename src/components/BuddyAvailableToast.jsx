@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Toast: "alguien quiere un buddy ahora"
+// Sintonía FES Iztacala — Toast: "alguien quiere un buddy ahora"
 // Suscribe en realtime a buddy_queue. Cuando alguien NUEVO se
 // mete en cola Y no eres tú Y no tienes pareja activa, muestra
 // un toast discreto invitando a conectar.

@@ -1,4 +1,4 @@
-# Sintonía UNAM
+# Sintonía FES Iztacala
 
 > Orientación universitaria para el bienestar emocional.
 > Plataforma anónima, informativa y no diagnóstica para la comunidad UNAM.

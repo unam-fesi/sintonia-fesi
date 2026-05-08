@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Treasure Hunt
+// Sintonía FES Iztacala — Treasure Hunt
 // Eventos con pistas que se desbloquean por progreso (check-ins, ruta, etc.)
 // =============================================================
 

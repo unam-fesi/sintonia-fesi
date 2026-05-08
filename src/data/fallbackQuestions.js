@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — 20 preguntas fallback
+// Sintonía FES Iztacala — 20 preguntas fallback
 // Se usan si la BD no tiene preguntas activas configuradas.
 // 5 dimensiones × 4 preguntas = 20 reactivos.
 //

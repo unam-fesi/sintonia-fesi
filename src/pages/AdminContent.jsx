@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Editor de contenido (preguntas / recursos / recomendaciones)
+// Sintonía FES Iztacala — Editor de contenido (preguntas / recursos / recomendaciones)
 // =============================================================
 
 import { useEffect, useState } from 'react';

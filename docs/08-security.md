@@ -1,6 +1,6 @@
 # 08 · Seguridad
 
-Sintonía UNAM atiende a estudiantes que pueden estar pasando por momentos vulnerables. La seguridad y privacidad no son opcionales — son requisito ético.
+Sintonía FES Iztacala atiende a estudiantes que pueden estar pasando por momentos vulnerables. La seguridad y privacidad no son opcionales — son requisito ético.
 
 ## Principios
 

@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Mapa vivo de bienestar universitario
+// Sintonía FES Iztacala — Mapa vivo de bienestar universitario
 // Recursos + árboles + eventos próximos sobre OpenStreetMap.
 // =============================================================
 
@@ -94,7 +94,7 @@ export default function MapPage() {
           <strong>${escape(t.species || 'Árbol')}</strong><br/>
           <small>${escape(t.location_name||'')}</small><br/>
           ${t.notes ? escape(t.notes) : ''}
-          <br/><a href="/sintonia-unam/arboles">Ver y adoptar →</a>
+          <br/><a href="/sintonia-fesi/arboles">Ver y adoptar →</a>
         `);
         m.addTo(layerGroups.trees);
       });
@@ -127,7 +127,7 @@ export default function MapPage() {
         </div>
 
         <p className="note text-center mt-3">
-          ¿Conoces un lugar de bienestar que falta en el mapa? Avisa a tu equipo de Sintonía UNAM
+          ¿Conoces un lugar de bienestar que falta en el mapa? Avisa a tu equipo de Sintonía FES Iztacala
           o agrégalo desde el panel admin si tienes acceso.
         </p>
       </div>

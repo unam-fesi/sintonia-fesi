@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Gráficas simples SVG (sin dependencias externas)
+// Sintonía FES Iztacala — Gráficas simples SVG (sin dependencias externas)
 // =============================================================
 
 // Línea temporal

@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Admin Programa
+// Sintonía FES Iztacala — Admin Programa
 // CRUD de: árboles, eventos del calendario, treasure hunts, biblioteca, especialistas
 // =============================================================
 

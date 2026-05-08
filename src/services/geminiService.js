@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Cliente de la Edge Function de Gemini
+// Sintonía FES Iztacala — Cliente de la Edge Function de Gemini
 // Llama a `generate-orientation` en Supabase y devuelve un
 // objeto { friendly_summary, suggested_actions, recommended_resources, safety_note }.
 //

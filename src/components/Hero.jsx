@@ -7,7 +7,7 @@ export default function Hero() {
       <div className="container">
         <div className="hero-grid">
           <div className="hero-card card fade-in">
-            <span className="tag">Programa universitario · UNAM</span>
+            <span className="tag">Programa universitario · FES Iztacala</span>
             <h1 className="mt-2">
               Sintonízate contigo, con tu <span style={{color: 'var(--c-oro-700)'}}>comunidad</span>
               {' '}y con tu bienestar.
@@ -15,7 +15,7 @@ export default function Hero() {
             <p className="lede">
               Una autoevaluación breve, anónima y con recomendaciones personalizadas
               para reflexionar sobre tu bienestar emocional y conocer recursos de apoyo
-              dentro de la UNAM.
+              en FES Iztacala y la UNAM.
             </p>
             <ul className="hero-checks">
               <li><strong>20 preguntas</strong> en 7 a 10 minutos</li>
@@ -34,16 +34,14 @@ export default function Hero() {
           </div>
 
           <aside className="hero-visual fade-in" aria-hidden="true">
-            <div className="orb-grid">
-              <div className="orb azul"><div><span>🧠</span>Psicología</div></div>
-              <div className="orb oro"><div><span>⚖️</span>Equilibrio</div></div>
-              <div className="orb salvia"><div><span>🌿</span>Calma</div></div>
-              <div className="orb coral"><div><span>🤝</span>Comunidad</div></div>
-              <div className="orb marfil"><div><span>✨</span>Sintonía</div></div>
-              <div className="orb lavanda"><div><span>🎨</span>Arte</div></div>
-              <div className="orb salvia"><div><span>🏃</span>Deporte</div></div>
-              <div className="orb azul"><div><span>📚</span>Estudio</div></div>
-              <div className="orb oro"><div><span>💛</span>Bienestar</div></div>
+            <div className="hero-logo-wrap">
+              <img
+                className="hero-logo"
+                src={`${import.meta.env.BASE_URL}Sintonia.png`}
+                alt="Sintonía FES Iztacala"
+                loading="eager"
+                decoding="async"
+              />
             </div>
           </aside>
         </div>

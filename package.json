@@ -1,9 +1,9 @@
 {
-  "name": "sintonia-unam",
+  "name": "sintonia-fesi",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Sintonía UNAM — Plataforma de orientación universitaria para el bienestar emocional.",
+  "description": "Sintonía FES Iztacala — Plataforma de orientación universitaria para el bienestar emocional.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Carga Leaflet vía CDN una sola vez
+// Sintonía FES Iztacala — Carga Leaflet vía CDN una sola vez
 // Evita agregar la dependencia npm — sirve para mapas simples.
 // =============================================================
 

@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — RoleGuard
+// Sintonía FES Iztacala — RoleGuard
 // Bloquea rutas admin a usuarios sin el permiso requerido.
 // =============================================================
 

@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Botón flotante de Apoyo Inmediato
+// Sintonía FES Iztacala — Botón flotante de Apoyo Inmediato
 // Aparece cuando: el último resultado fue prioritario, O cuando
 // el usuario lo activa manualmente desde /apoyo.
 // =============================================================

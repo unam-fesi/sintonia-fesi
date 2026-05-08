@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Frase y Reto del día
+// Sintonía FES Iztacala — Frase y Reto del día
 // Selección determinista por fecha desde student_library.
 // =============================================================
 

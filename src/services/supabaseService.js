@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Lecturas/escrituras a Supabase
+// Sintonía FES Iztacala — Lecturas/escrituras a Supabase
 // Cae a datos fallback si la BD no está configurada.
 // =============================================================
 

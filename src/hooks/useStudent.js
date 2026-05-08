@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Hook para gestionar la "sesión" anónima del estudiante
+// Sintonía FES Iztacala — Hook para gestionar la "sesión" anónima del estudiante
 // Guarda anonymous_code (+ password opcional) en sessionStorage.
 // =============================================================
 

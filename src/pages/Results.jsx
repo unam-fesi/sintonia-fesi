@@ -34,7 +34,7 @@ export default function Results() {
 
   function copyResult() {
     const lines = [
-      `Sintonía UNAM — Tu orientación`,
+      `Sintonía FES Iztacala — Tu orientación`,
       `Código anónimo: ${result.anonymous_code}`,
       `Nivel general: ${result.general_level_label} (${result.total_score}/100)`,
       ``,

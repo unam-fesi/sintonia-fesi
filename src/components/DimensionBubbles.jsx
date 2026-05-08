@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — DimensionBubbles 3D
+// Sintonía FES Iztacala — DimensionBubbles 3D
 // Esferas distribuidas en una esfera virtual.
 // Rotación ambiental lenta + drag con mouse en horizontal y vertical.
 // =============================================================

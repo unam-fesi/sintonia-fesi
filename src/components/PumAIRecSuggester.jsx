@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Pum-AI sugiere recomendaciones por dimensión/nivel
+// Sintonía FES Iztacala — Pum-AI sugiere recomendaciones por dimensión/nivel
 // =============================================================
 
 import { useState } from 'react';

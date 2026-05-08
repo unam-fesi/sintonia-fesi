@@ -9,7 +9,7 @@ const PILLARS = [
     text: 'Veinte preguntas en aproximadamente siete a diez minutos.' },
   { icon: '📊', accent: 'oro',     title: 'Resultado informativo',
     text: 'Un panorama de tus dimensiones de bienestar, sin etiquetas clínicas.' },
-  { icon: '🌿', accent: 'salvia',  title: 'Recomendaciones personalizadas',
+  { icon: '🌿', accent: 'mint',    title: 'Recomendaciones personalizadas',
     text: 'Acciones de autocuidado y vinculación con actividades universitarias.' },
   { icon: '🏛',  accent: 'coral',   title: 'Recursos universitarios',
     text: 'Orientación psicológica, deporte, cultura, comunidad y bienestar verde.' },
@@ -17,10 +17,88 @@ const PILLARS = [
     text: 'Te acompaña con redacción amable; nunca diagnostica ni sustituye atención profesional.' },
 ];
 
+// Áreas que acompaña la plataforma — antes vivían como "orbs" en el hero.
+// Ahora son cards bajo el logo grande.
+const AREAS = [
+  { icon: '🧠', tone: 'azul',     label: 'Psicología' },
+  { icon: '⚖️', tone: 'oro',      label: 'Equilibrio' },
+  { icon: '🌿', tone: 'mint',     label: 'Calma'      },
+  { icon: '🤝', tone: 'coral',    label: 'Comunidad'  },
+  { icon: '✨', tone: 'lavanda',  label: 'Sintonía'   },
+  { icon: '🎨', tone: 'rosa',     label: 'Arte'       },
+  { icon: '🏃', tone: 'durazno',  label: 'Deporte'    },
+  { icon: '📚', tone: 'azul',     label: 'Estudio'    },
+  { icon: '💛', tone: 'peach',    label: 'Bienestar'  },
+];
+
 export default function Home() {
   return (
     <>
       <Hero />
+
+      {/* ===== Áreas que acompañamos (antes orbs del hero) ===== */}
+      <section className="section-sm">
+        <div className="container">
+          <div className="text-center" style={{maxWidth: 640, margin: '0 auto'}}>
+            <span className="tag lavanda">Áreas que acompañamos</span>
+            <h2 className="mt-2" style={{fontSize:'clamp(1.3rem, 2vw, 1.8rem)'}}>
+              Lo que cuida Sintonía FES Iztacala
+            </h2>
+          </div>
+          <div className="areas-grid">
+            {AREAS.map(a => (
+              <div key={a.label} className={`area-chip area-${a.tone}`}>
+                <span className="area-icon" aria-hidden="true">{a.icon}</span>
+                <span className="area-label">{a.label}</span>
+              </div>
+            ))}
+          </div>
+          <style>{`
+            .areas-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+              gap: 12px;
+              margin-top: 22px;
+              max-width: 980px;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            .area-chip {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 14px 18px;
+              border-radius: 16px;
+              background: rgba(255,255,255,0.85);
+              backdrop-filter: blur(8px);
+              -webkit-backdrop-filter: blur(8px);
+              border: 1px solid rgba(255,255,255,0.6);
+              box-shadow: 0 4px 14px rgba(108,80,124,0.06);
+              font-weight: 600;
+              transition: transform 0.25s ease, box-shadow 0.25s ease;
+            }
+            .area-chip:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(108,80,124,0.12); }
+            .area-icon { font-size: 1.4rem; }
+            .area-label { font-family: var(--ff-serif); font-size: 1rem; }
+
+            .area-azul    { color: var(--c-azul-800);     border-color: rgba(16,36,62,0.18); }
+            .area-oro     { color: var(--c-oro-700);      border-color: rgba(201,162,39,0.30); }
+            .area-mint    { color: var(--c-mint-700);     border-color: rgba(125,196,174,0.45); }
+            .area-coral   { color: var(--c-coral-700);    border-color: rgba(232,130,107,0.40); }
+            .area-lavanda { color: var(--c-lavanda-700);  border-color: rgba(157,123,217,0.35); }
+            .area-rosa    { color: var(--c-rosa-700);     border-color: rgba(232,130,159,0.40); }
+            .area-durazno { color: var(--c-durazno-700);  border-color: rgba(224,172,74,0.40); }
+            .area-peach   { color: var(--c-peach-700);    border-color: rgba(255,154,123,0.40); }
+
+            @media (max-width: 540px) {
+              .areas-grid { grid-template-columns: repeat(2, 1fr); }
+              .area-chip { padding: 11px 14px; }
+              .area-label { font-size: 0.92rem; }
+              .area-icon { font-size: 1.2rem; }
+            }
+          `}</style>
+        </div>
+      </section>
 
       <section className="section-sm">
         <div className="container" style={{maxWidth: 980}}>
@@ -39,10 +117,10 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <div className="text-center" style={{maxWidth: 720, margin: '0 auto'}}>
-            <span className="tag">Cómo te acompaña Sintonía UNAM</span>
+            <span className="tag">Cómo te acompaña Sintonía FES Iztacala</span>
             <h2 className="mt-2">Una orientación clara, anónima y con sentido comunitario</h2>
             <p className="lede">
-              Sintonía UNAM es una plataforma para reflexionar sobre tu bienestar emocional,
+              Sintonía FES Iztacala es una plataforma para reflexionar sobre tu bienestar emocional,
               identificar áreas de autocuidado y conocer recursos de apoyo dentro de la UNAM.
             </p>
           </div>

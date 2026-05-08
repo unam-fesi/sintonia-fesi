@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Lógica de cálculo del resultado
+// Sintonía FES Iztacala — Lógica de cálculo del resultado
 // Transparente y trazable. Sin terminología clínica.
 // =============================================================
 

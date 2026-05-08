@@ -1,8 +1,8 @@
 // =============================================================
-// Sintonía UNAM — Constantes globales
+// Sintonía FES Iztacala — Constantes globales
 // =============================================================
 
-export const APP_NAME = 'Sintonía UNAM';
+export const APP_NAME = 'Sintonía FES Iztacala';
 export const APP_TAGLINE = 'Orientación universitaria para el bienestar emocional';
 export const TEST_VERSION = '1.0.0';
 export const TOTAL_QUESTIONS = 20;

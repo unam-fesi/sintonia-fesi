@@ -42,12 +42,12 @@ export default function AdminLogin() {
         <img
           src={`${import.meta.env.BASE_URL}Sintonia-icon192.png`}
           srcSet={`${import.meta.env.BASE_URL}Sintonia-icon192.png 1x, ${import.meta.env.BASE_URL}Sintonia-icon512.png 2x`}
-          alt="Sintonía UNAM"
+          alt="Sintonía FES Iztacala"
           className="login-mark"
           width="72" height="72"
         />
         <h1>Acceso interno</h1>
-        <p className="lede text-center">Panel administrativo · Sintonía UNAM</p>
+        <p className="lede text-center">Panel administrativo · Sintonía FES Iztacala</p>
 
         {error && <div className="login-error">{error}</div>}
 

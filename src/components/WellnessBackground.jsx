@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Background "marea de acuarela"
+// Sintonía FES Iztacala — Background "marea de acuarela"
 // Wash base con gradiente desplazándose lento + blobs gigantes con
 // mix-blend-mode + parallax sutil al scroll. Tema wellness con
 // lavanda dominante para sensación de calma.

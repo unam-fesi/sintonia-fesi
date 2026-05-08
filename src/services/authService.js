@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Auth y permisos para /admin
+// Sintonía FES Iztacala — Auth y permisos para /admin
 // =============================================================
 
 import { supabase, isSupabaseConfigured } from '../config/supabaseClient.js';

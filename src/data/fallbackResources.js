@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Catálogo base de recursos universitarios
+// Sintonía FES Iztacala — Catálogo base de recursos universitarios
 // Tipos: orientacion_psicologica · tutoria_academica · deporte ·
 //        cultura · comunidad · medico · emergencia · sustentabilidad
 // =============================================================

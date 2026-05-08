@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Toast flotante de próximos webinars
+// Sintonía FES Iztacala — Toast flotante de próximos webinars
 // =============================================================
 
 import { useEffect, useState } from 'react';

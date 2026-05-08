@@ -1,5 +1,5 @@
 // =============================================================
-// Sintonía UNAM — Audit log helper
+// Sintonía FES Iztacala — Audit log helper
 // Llama esto desde cualquier acción admin para dejar trazo.
 // =============================================================
 

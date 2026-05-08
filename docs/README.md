@@ -1,6 +1,6 @@
-# 📚 Documentación · Sintonía UNAM
+# 📚 Documentación · Sintonía FES Iztacala
 
-Bienvenido a la documentación técnica y funcional del proyecto **Sintonía UNAM**.
+Bienvenido a la documentación técnica y funcional del proyecto **Sintonía FES Iztacala**.
 
 ## Índice
 
@@ -19,9 +19,9 @@ Bienvenido a la documentación técnica y funcional del proyecto **Sintonía UNA
 
 ## Quick links
 
-- 🏠 [Landing pública](https://unam-fesi.github.io/sintonia-unam/)
-- 🔒 [Panel admin](https://unam-fesi.github.io/sintonia-unam/admin/login)
-- 📦 [Repositorio](https://github.com/unam-fesi/sintonia-unam)
+- 🏠 [Landing pública](https://unam-fesi.github.io/sintonia-fesi/)
+- 🔒 [Panel admin](https://unam-fesi.github.io/sintonia-fesi/admin/login)
+- 📦 [Repositorio](https://github.com/unam-fesi/sintonia-fesi)
 - 🛠 [README de instalación local](../README.md)
 
 ## Contacto

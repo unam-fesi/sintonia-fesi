@@ -51,16 +51,16 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="container topbar">
-        <Link to="/" className="brand" aria-label="Sintonía UNAM, ir al inicio">
+        <Link to="/" className="brand" aria-label="Sintonía FES Iztacala, ir al inicio">
           <img
             src={`${import.meta.env.BASE_URL}Sintonia-icon192.png`}
             srcSet={`${import.meta.env.BASE_URL}Sintonia-icon192.png 1x, ${import.meta.env.BASE_URL}Sintonia-icon512.png 2x`}
-            alt="Sintonía UNAM"
+            alt="Sintonía FES Iztacala"
             className="brand-logo"
             width="56" height="56"
           />
           <div className="brand-copy">
-            <strong>Sintonía UNAM</strong>
+            <strong>Sintonía FES Iztacala</strong>
             <span>Bienestar emocional universitario</span>
           </div>
         </Link>

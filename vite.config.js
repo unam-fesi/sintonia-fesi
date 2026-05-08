@@ -2,9 +2,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 // Si el repo se llama distinto, cambia BASE.
-// Para usuario.github.io/sintonia-unam → "/sintonia-unam/"
+// Para usuario.github.io/sintonia-fesi → "/sintonia-fesi/"
 // Para dominio personalizado o root  → "/"
-const BASE = process.env.VITE_BASE_PATH || '/sintonia-unam/';
+const BASE = process.env.VITE_BASE_PATH || '/sintonia-fesi/';
 
 export default defineConfig({
   base: BASE,
