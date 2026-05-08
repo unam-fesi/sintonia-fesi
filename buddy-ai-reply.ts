@@ -160,6 +160,9 @@ serve(async (req) => {
     // Saludo inicial — variado, casual, SIN revelar carrera/facultad/nombre.
     // El sistema es anónimo: el partner es "alguien más como tú".
     const greeting = pickGreeting(aiCode);
+    // Delay humano antes del saludo (1.8-3.5s) — como si la persona acabara de conectar
+    const helloDelay = 1800 + Math.random() * 1700;
+    await new Promise(r => setTimeout(r, helloDelay));
     await supa.from("buddy_messages").insert({
       pair_id: pairId, sender_code: aiCode, message: greeting,
     });
@@ -235,6 +238,7 @@ Si dice algo de crisis grave (autolesión/suicidio/no quiero seguir), NO minimic
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
 
+  const geminiStart = Date.now();
   try {
     const resp = await fetch(url, {
       method: "POST",
@@ -281,11 +285,28 @@ Si dice algo de crisis grave (autolesión/suicidio/no quiero seguir), NO minimic
       reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
 
+    // ===== Delay humano variable =====
+    // Simula que la persona está "leyendo + escribiendo".
+    // Base: ~1.6s. Por carácter de respuesta: ~22-35ms (típico al teclear en celular).
+    // Le restamos lo que ya tardó Gemini para no acumular demasiado.
+    // Cap: 9s máximo para no aburrir al usuario.
+    const geminiMs    = Date.now() - geminiStart;
+    const perChar     = 22 + Math.random() * 13;        // 22-35ms por char
+    const baseDelay   = 1400 + Math.random() * 600;     // 1.4-2.0s base
+    const charDelay   = reply.length * perChar;
+    const jitter      = Math.random() * 700;            // 0-0.7s aleatorio
+    const targetTotal = Math.min(9000, baseDelay + charDelay + jitter);
+    const remainingMs = Math.max(0, targetTotal - geminiMs);
+    if (remainingMs > 0) await new Promise(r => setTimeout(r, remainingMs));
+
     await supa.from("buddy_messages").insert({
       pair_id: pairId, sender_code: aiCode, message: reply,
     });
 
-    return json({ ok: true, replied: true, message: reply });
+    return json({
+      ok: true, replied: true, message: reply,
+      timing: { gemini_ms: geminiMs, waited_ms: remainingMs, target_ms: Math.round(targetTotal) },
+    });
   } catch (err: any) {
     console.error("[buddy-ai] fetch err", err);
     return json({ error: "Pum-AI fetch failed", detail: String(err?.message || err) }, 500);

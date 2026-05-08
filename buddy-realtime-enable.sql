@@ -1,10 +1,11 @@
 -- =============================================================
--- Sintonía UNAM — Habilitar realtime para buddy_messages
--- Esto permite que Supabase haga push de los inserts vía websocket,
--- evitando el polling cada 5-8 segundos en /buddy.
+-- Sintonía UNAM — Habilitar realtime para buddy_messages y buddy_queue
+-- - buddy_messages: para el chat sin polling
+-- - buddy_queue:    para notificar a otros usuarios cuando alguien
+--   nuevo entra a buscar un buddy ("Alguien busca un buddy ahora")
 -- =============================================================
 
--- 1) Asegurar que la tabla está en la publicación supabase_realtime
+-- 1) buddy_messages a la publicación supabase_realtime
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -15,10 +16,20 @@ BEGIN
   ) THEN
     EXECUTE 'ALTER PUBLICATION supabase_realtime ADD TABLE public.buddy_messages';
   END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'buddy_queue'
+  ) THEN
+    EXECUTE 'ALTER PUBLICATION supabase_realtime ADD TABLE public.buddy_queue';
+  END IF;
 END $$;
 
--- 2) Asegurar replica identity FULL para que el payload incluya la fila completa
+-- 2) Replica identity FULL para que los payloads tengan la fila completa
 ALTER TABLE public.buddy_messages REPLICA IDENTITY FULL;
+ALTER TABLE public.buddy_queue    REPLICA IDENTITY FULL;
 
 -- 3) (Opcional) Política RLS para SELECT — el subscriber valida con anon key
 --    Realtime requiere que la sesión pueda hacer SELECT vía RLS para recibir el evento.

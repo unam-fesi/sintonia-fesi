@@ -234,20 +234,21 @@ export default function Buddy() {
 
     // Si es buddy IA, disparar respuesta — la respuesta llegará por realtime
     if (pair.is_ai_buddy) {
-      // Mostrar "escribiendo…" tras un pequeño delay
+      // Mostrar "escribiendo…" tras un pequeño delay (1.0-1.8s) — como leyendo
       if (aiTypingTimeoutRef.current) clearTimeout(aiTypingTimeoutRef.current);
-      const showAt = 600 + Math.random() * 800;
+      const showAt = 1000 + Math.random() * 800;
       aiTypingTimeoutRef.current = setTimeout(() => setAiTyping(true), showAt);
 
-      // Delay natural antes de invocar la respuesta
+      // Invocar casi inmediato — el delay humano ahora vive en la Edge Function
+      // (que escala el tiempo según longitud de la respuesta)
       setTimeout(() => {
         supabase.functions.invoke('buddy-ai-reply', { body: { pair_id: pair.id } })
           .catch(() => {})
           .finally(() => {
-            // Si por alguna razón no llegó por realtime, apagar typing tras 12s
-            setTimeout(() => setAiTyping(false), 12000);
+            // Hard-fallback: apagar typing tras 15s si por algo no llegó por realtime
+            setTimeout(() => setAiTyping(false), 15000);
           });
-      }, 900 + Math.random() * 1400);
+      }, 200 + Math.random() * 400);
     }
     // No llamamos refreshState — realtime hace el trabajo
   }

@@ -5,6 +5,7 @@ import Footer from './components/Footer.jsx';
 import CrisisFAB from './components/CrisisFAB.jsx';
 import WebinarToast from './components/WebinarToast.jsx';
 import WellnessBackground from './components/WellnessBackground.jsx';
+import BuddyAvailableToast from './components/BuddyAvailableToast.jsx';
 
 // Páginas core eager (camino crítico: home + flujo del test)
 import Home       from './pages/Home.jsx';
@@ -88,6 +89,7 @@ export default function App() {
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <CrisisFAB />}
       {!isAdminRoute && <WebinarToast />}
+      {!isAdminRoute && <BuddyAvailableToast />}
     </>
   );
 }
