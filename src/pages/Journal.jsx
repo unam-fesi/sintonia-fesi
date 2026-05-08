@@ -5,6 +5,13 @@ import { useStudent } from '../hooks/useStudent.js';
 
 const EMOTIONS = ['Calma','Alegría','Gratitud','Cansancio','Ansiedad','Tristeza','Enojo','Confusión','Esperanza'];
 
+function resolveMediaUrl(url) {
+  if (!url) return '';
+  if (/^(https?:|data:|blob:)/.test(url)) return url;
+  const base = import.meta.env.BASE_URL || '/';
+  return base + url.replace(/^\/+/, '');
+}
+
 export default function Journal() {
   const { student } = useStudent();
   const navigate = useNavigate();
@@ -13,6 +20,8 @@ export default function Journal() {
   const [emotion, setEmotion] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [suggestion, setSuggestion] = useState(null);
+  const [suggestLoading, setSuggestLoading] = useState(false);
 
   useEffect(() => {
     if (!student?.code) {
@@ -38,14 +47,48 @@ export default function Journal() {
   async function add() {
     if (!text.trim()) return;
     setSaving(true);
+    const entry = text.trim();
+    const tag = emotion || null;
     await supabase.from('student_journal').insert({
       anonymous_code: student.code,
-      entry: text.trim(),
-      emotion_tag: emotion || null,
+      entry,
+      emotion_tag: tag,
     });
     setText(''); setEmotion('');
     await load();
     setSaving(false);
+
+    // Pum-AI sugiere algo de la biblioteca
+    requestSuggestion(entry, tag);
+  }
+
+  async function requestSuggestion(entry, emotion_tag) {
+    setSuggestLoading(true); setSuggestion(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('journal-suggest', {
+        body: {
+          anonymous_code: student.code,
+          entry,
+          emotion_tag,
+        },
+      });
+      if (error || !data) { setSuggestLoading(false); return; }
+      if (data.error) { setSuggestLoading(false); return; }
+      if (data.crisis) {
+        setSuggestion({ kind: 'crisis', message: data.message });
+      } else if (data.suggestion) {
+        setSuggestion({
+          kind: 'resource',
+          item: data.suggestion,
+          reason: data.reason,
+          fallback: !!data.fallback,
+        });
+      }
+    } catch (e) {
+      console.warn(e);
+    } finally {
+      setSuggestLoading(false);
+    }
   }
 
   async function remove(id) {
@@ -92,6 +135,34 @@ export default function Journal() {
           <button className="btn btn-primary mt-2" disabled={saving || !text.trim()} onClick={add}>
             {saving ? 'Guardando…' : 'Agregar entrada'}
           </button>
+
+          {(suggestLoading || suggestion) && (
+            <div className="suggest-area mt-3">
+              {suggestLoading && (
+                <div className="suggest-loading">
+                  <div className="spinner small" />
+                  <span>Pum-AI está eligiendo algo para ti…</span>
+                </div>
+              )}
+              {suggestion?.kind === 'crisis' && (
+                <div className="suggest-card crisis">
+                  <strong>{suggestion.message}</strong>
+                  <p>Te invitamos a llamar a la <strong>Línea de la Vida 800 290 0024</strong> y revisar las opciones en /apoyo.</p>
+                  <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:8}}>
+                    <a href="tel:8002900024" className="btn btn-coral btn-sm">📞 Llamar</a>
+                    <Link to="/apoyo" className="btn btn-ghost btn-sm">Ver apoyos</Link>
+                  </div>
+                </div>
+              )}
+              {suggestion?.kind === 'resource' && (
+                <SuggestionCard
+                  item={suggestion.item}
+                  reason={suggestion.reason}
+                  onDismiss={() => setSuggestion(null)}
+                />
+              )}
+            </div>
+          )}
         </div>
 
         <section className="panel mt-3">
@@ -120,6 +191,51 @@ export default function Journal() {
       </div>
 
       <style>{`
+        .suggest-area { animation: fadeInUp 0.3s ease; }
+        .suggest-loading {
+          display: flex; align-items: center; gap: 10px;
+          padding: 12px 16px;
+          background: var(--c-azul-100);
+          border-radius: 12px;
+          color: var(--c-azul-800);
+          font-size: 0.92rem;
+        }
+        .spinner.small { width: 18px; height: 18px; border-width: 2px; margin: 0; }
+        .suggest-card {
+          background: linear-gradient(135deg, var(--c-oro-100), var(--c-salvia-100));
+          border: 1px solid var(--c-oro-600);
+          border-radius: var(--r-md);
+          padding: 16px 18px;
+          position: relative;
+        }
+        .suggest-card.crisis {
+          background: linear-gradient(135deg, var(--c-coral-100), #FFF6F2);
+          border-color: var(--c-coral-500);
+          color: #5C2018;
+        }
+        .suggest-card.crisis strong { color: #93362A; display: block; margin-bottom: 4px; }
+        .suggest-card .badge {
+          display: inline-block;
+          background: var(--c-azul-800); color: var(--c-oro-400);
+          padding: 3px 10px; border-radius: 999px;
+          font-size: 0.74rem; font-weight: 800;
+          letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        .suggest-card h4 { color: var(--c-azul-800); margin: 8px 0 4px; font-size: 1.05rem; }
+        .suggest-card p { margin: 4px 0; font-size: 0.92rem; color: var(--c-texto-soft); }
+        .suggest-card .reason {
+          font-style: italic;
+          background: rgba(255,255,255,0.7);
+          padding: 10px 12px;
+          border-radius: 10px;
+          margin: 8px 0;
+          color: var(--c-azul-800);
+        }
+        .suggest-card .dismiss {
+          position: absolute; top: 8px; right: 8px;
+          background: transparent; border: 0; cursor: pointer;
+          font-size: 0.92rem; color: var(--c-gris);
+        }
         .emo-pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0 4px; }
         .emo-pills small { color: var(--c-gris); font-size: 0.84rem; margin-right: 6px; }
         .emo-pill {
@@ -158,5 +274,47 @@ export default function Journal() {
         .entry-item p { margin: 0; font-family: var(--ff-serif); font-size: 1.02rem; color: var(--c-azul-800); font-style: italic; }
       `}</style>
     </section>
+  );
+}
+
+function SuggestionCard({ item, reason, onDismiss }) {
+  const media = resolveMediaUrl(item.media_url);
+  const catLabel = {
+    sound: '🎧 Sonido',
+    video: '🎬 Video',
+    breathing: '🌬 Respiración',
+    challenge: '🎯 Reto',
+    quote: '💭 Frase',
+    dictionary: '📖 Emoción',
+  }[item.category] || '✨ Recurso';
+
+  return (
+    <div className="suggest-card">
+      <button className="dismiss" onClick={onDismiss} aria-label="Cerrar">✕</button>
+      <span className="badge">✨ Pum-AI te sugiere · {catLabel}</span>
+      <h4>{item.title}</h4>
+      {item.body && <p>{item.body}</p>}
+      {reason && <p className="reason">"{reason}"</p>}
+
+      {item.media_url && item.category === 'sound' && (
+        <audio controls preload="metadata" src={media} style={{width:'100%', marginTop: 6}} />
+      )}
+      {item.media_url && item.category === 'video' && (
+        <video controls preload="metadata" src={media} style={{width:'100%', borderRadius: 8, marginTop: 6}} />
+      )}
+      {item.media_url && !['sound','video'].includes(item.category) && (
+        <a href={media} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm" style={{marginTop:6}}>
+          Abrir recurso →
+        </a>
+      )}
+      {item.meta?.tempo && (
+        <small style={{display:'block',marginTop:8,color:'var(--c-gris)'}}>
+          🎵 {item.meta.tempo} · {item.meta.energy ? `Energía ${item.meta.energy.toLowerCase()}` : ''}
+        </small>
+      )}
+      <div style={{marginTop:8, display:'flex', gap:6, flexWrap:'wrap'}}>
+        <Link to="/biblioteca" className="btn btn-ghost btn-sm">Ver más en biblioteca →</Link>
+      </div>
+    </div>
   );
 }
