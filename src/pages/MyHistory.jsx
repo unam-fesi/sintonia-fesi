@@ -349,13 +349,18 @@ function HistoryView({ data, code, onLogout }) {
           </section>
 
           <section className="panel">
-            <h2>Logros ({data.achievements.length})</h2>
-            {data.achievements.length === 0 && <p className="note">Aún sin logros — ¡sigue cuidándote!</p>}
-            <ul className="hist-list">
-              {data.achievements.map((a, i) => (
-                <li key={i}>🏆 {a.achievement_key}</li>
-              ))}
-            </ul>
+            <h2>Logros y retos</h2>
+            <ChallengesTracker achievements={data.achievements || []} />
+            <h3 className="mt-3" style={{fontSize:'0.94rem'}}>🏆 Otros logros ({data.achievements.filter(a => !a.achievement_key.startsWith('challenge_')).length})</h3>
+            {data.achievements.filter(a => !a.achievement_key.startsWith('challenge_')).length === 0 ? (
+              <p className="note">Aún sin logros — ¡sigue cuidándote!</p>
+            ) : (
+              <ul className="hist-list">
+                {data.achievements.filter(a => !a.achievement_key.startsWith('challenge_')).map((a, i) => (
+                  <li key={i}>🏆 {humanAchievement(a.achievement_key)}</li>
+                ))}
+              </ul>
+            )}
           </section>
         </div>
       </div>
@@ -387,6 +392,78 @@ function HistoryView({ data, code, onLogout }) {
       `}</style>
     </section>
   );
+}
+
+function ChallengesTracker({ achievements }) {
+  // achievements format: 'challenge_<dayHash>_<id>'
+  const challenges = achievements
+    .filter(a => a.achievement_key.startsWith('challenge_'))
+    .map(a => ({
+      key: a.achievement_key,
+      day: parseInt(a.achievement_key.split('_')[1] || '0'),
+      date: a.awarded_at ? new Date(a.awarded_at) : null,
+    }))
+    .sort((a, b) => b.day - a.day);
+
+  const total = challenges.length;
+  const today = (() => {
+    const d = new Date();
+    return d.getFullYear() * 1000 + d.getMonth() * 32 + d.getDate();
+  })();
+
+  // Streak: días consecutivos terminando en hoy o ayer
+  let streak = 0;
+  const days = [...new Set(challenges.map(c => c.day))].sort((a, b) => b - a);
+  let cursor = today;
+  for (const d of days) {
+    if (d === cursor || d === cursor - 1) {
+      streak++;
+      cursor = d - 1;
+    } else if (d < cursor - 1) {
+      break;
+    }
+  }
+
+  return (
+    <div className="challenges-tracker">
+      <div className="ct-row">
+        <div className="ct-stat">
+          <span className="ct-num">{total}</span>
+          <small>retos completados</small>
+        </div>
+        <div className="ct-stat">
+          <span className="ct-num">{streak}</span>
+          <small>días seguidos</small>
+        </div>
+        {streak >= 3 && <div className="ct-fire">🔥</div>}
+      </div>
+      {streak >= 7 && <p className="note" style={{textAlign:'center',color:'#7B5E14'}}>✨ Una semana completa de retos. ¡Eso es disciplina con cariño!</p>}
+      {streak === 0 && total > 0 && <p className="note" style={{textAlign:'center'}}>Hoy es buen día para retomar tu reto diario.</p>}
+      <style>{`
+        .challenges-tracker { background: linear-gradient(135deg, var(--c-oro-100), var(--c-marfil)); padding: 14px; border-radius: 12px; }
+        .ct-row { display: flex; gap: 18px; align-items: center; justify-content: center; }
+        .ct-stat { text-align: center; }
+        .ct-num { display: block; font-family: var(--ff-serif); font-size: 1.8rem; font-weight: 800; color: var(--c-azul-800); }
+        .ct-stat small { color: var(--c-gris); font-size: 0.78rem; }
+        .ct-fire { font-size: 2rem; animation: bounce 1.6s ease-in-out infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+      `}</style>
+    </div>
+  );
+}
+
+function humanAchievement(key) {
+  const map = {
+    first_checkin: 'Primer check-in semanal',
+    first_day_route: 'Día 1 de tu ruta de bienestar',
+    seven_day_route: '🎉 Ruta de 7 días completa',
+    fourteen_day_route: '🎉🎉 Ruta de 14 días completa',
+    tree_adopted: 'Adoptaste un árbol 🌳',
+    wellness_walk: 'Caminata de bienestar',
+    journal_streak_7: '7 días de diario seguidos',
+    community_visit: 'Visitaste una actividad comunitaria',
+  };
+  return map[key] || key;
 }
 
 function generateAnonCode() {

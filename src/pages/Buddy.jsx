@@ -20,11 +20,45 @@ export default function Buddy() {
       return;
     }
     refreshState();
-    // Polling cada 8s para mensajes nuevos / pareja
-    const id = setInterval(refreshState, 8000);
+    // Polling cada 5s para mensajes nuevos / pareja
+    const id = setInterval(refreshState, 5000);
     return () => clearInterval(id);
   // eslint-disable-next-line
   }, [student?.code]);
+
+  // Si lleva 8s en cola sin emparejarse, auto-pair con buddy IA
+  useEffect(() => {
+    if (!inQueue || !student?.code) return;
+    const t = setTimeout(async () => {
+      // Verificar de nuevo: ¿ya hay pareja?
+      const { data: existingPair } = await supabase.from('buddy_pairs')
+        .select('id')
+        .or(`code_a.eq.${student.code},code_b.eq.${student.code}`)
+        .eq('active', true)
+        .maybeSingle();
+      if (existingPair) return; // ya se emparejó con humano
+
+      // Crear pareja con AI
+      const aiCode = `BUDDY-AI-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      const { data: created, error } = await supabase.from('buddy_pairs').insert({
+        code_a: student.code,
+        code_b: aiCode,
+        active: true,
+        is_ai_buddy: true,
+      }).select().single();
+      if (error) { console.warn(error); return; }
+
+      // Quitar de cola
+      await supabase.from('buddy_queue').delete().eq('anonymous_code', student.code);
+
+      // Disparar saludo del AI
+      await supabase.functions.invoke('buddy-ai-reply', { body: { pair_id: created.id } }).catch(() => {});
+
+      refreshState();
+    }, 8000);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line
+  }, [inQueue, student?.code]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -103,6 +137,15 @@ export default function Buddy() {
       sender_code: student.code,
       message: text,
     });
+
+    // Si es buddy IA, disparar respuesta inmediata
+    if (pair.is_ai_buddy) {
+      // Pequeño delay para que se sienta natural
+      setTimeout(() => {
+        supabase.functions.invoke('buddy-ai-reply', { body: { pair_id: pair.id } })
+          .then(() => refreshState());
+      }, 600 + Math.random() * 1200);
+    }
     refreshState();
   }
 

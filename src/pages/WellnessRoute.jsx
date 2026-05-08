@@ -62,9 +62,7 @@ export default function WellnessRoute() {
   async function generate(duration_days) {
     setGenerating(true); setErr(null);
     try {
-      // Recuperar últimos resultados del estudiante
       const last = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.RESULT) || 'null');
-
       const payload = {
         anonymous_code: student.code,
         session_id: last?.session_id || null,
@@ -76,8 +74,24 @@ export default function WellnessRoute() {
       };
 
       const { data, error } = await supabase.functions.invoke('generate-wellness-route', { body: payload });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+
+      // Si la edge function regresó non-2xx, supabase-js mete el response body en error.context
+      if (error) {
+        let detail = error.message || 'Error desconocido';
+        try {
+          const ctx = error.context;
+          if (ctx?.json) {
+            const body = await ctx.json();
+            detail = body.error || body.detail || detail;
+          } else if (ctx?.text) {
+            detail = await ctx.text();
+          } else if (ctx?.body) {
+            detail = JSON.stringify(ctx.body);
+          }
+        } catch { /* ignore */ }
+        throw new Error(detail);
+      }
+      if (data?.error) throw new Error(`${data.error}${data.detail ? ': ' + data.detail : ''}`);
 
       setRoute(data.route);
       setProgress({});

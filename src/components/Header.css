@@ -120,9 +120,31 @@
   text-decoration: none;
   transition: transform 0.18s;
 }
-.user-chip { cursor: pointer; border: none; font-family: inherit; }
-.user-chip:hover { transform: translateY(-1px); }
-.user-chip.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.4); }
+.user-area {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  background: linear-gradient(135deg, var(--c-azul-800), var(--c-azul-700));
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.user-area .user-chip {
+  background: transparent;
+  margin: 0;
+  border-radius: 0;
+}
+.user-area .user-menu-btn {
+  background: transparent;
+  border: 0;
+  border-left: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  cursor: pointer;
+  padding: 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.user-area .user-menu-btn:hover { background: rgba(255,255,255,0.10); }
+.user-area .user-menu-btn.active { background: rgba(255,255,255,0.18); }
 .drop-panel .logout-link {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
