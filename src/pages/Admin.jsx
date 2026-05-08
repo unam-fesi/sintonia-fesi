@@ -96,6 +96,23 @@ export default function Admin() {
           color: #fff;
           padding: 24px 18px;
         }
+        .admin-brand {
+          display: block;
+          margin: -8px -6px 18px;
+          padding: 10px 6px 14px;
+          border-bottom: 1px solid rgba(255,255,255,0.10);
+          text-align: center;
+          transition: opacity 0.2s;
+        }
+        .admin-brand:hover { opacity: 0.92; }
+        .admin-brand-logo {
+          display: block;
+          width: 100%;
+          max-width: 180px;
+          height: auto;
+          margin: 0 auto;
+          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));
+        }
         .admin-side .role-chip {
           display: inline-block;
           padding: 3px 8px;
@@ -211,6 +228,17 @@ function AdminSidebar({ ctx }) {
 
   return (
     <aside className="admin-side">
+      {/* Logo arriba del sidebar — identidad de marca persistente */}
+      <NavLink to="" end className="admin-brand" aria-label="Inicio del panel">
+        <img
+          src={`${import.meta.env.BASE_URL}Sintonia.png`}
+          alt="Sintonía FES Iztacala"
+          className="admin-brand-logo"
+          loading="eager"
+          decoding="async"
+        />
+      </NavLink>
+
       <NavLink to="perfil" className="profile-link" title="Editar mi perfil">
         <span className="avatar" aria-hidden="true">{initials}</span>
         <div className="profile-meta">
@@ -320,19 +348,55 @@ function AdminDashboard({ ctx }) {
 
   return (
     <>
-      <header className="page-head">
-        <div>
-          <span className="tag">Panel administrativo</span>
-          <h1 className="mt-2">Bienvenida, bienvenido</h1>
-          <p className="lede">
-            Como <strong>{ROLE_LABEL[r]}</strong>, accedes a {permissionsDescription(r)}.
-          </p>
+      <header className="page-head dashboard-head">
+        <div className="dashboard-welcome">
+          <img
+            src={`${import.meta.env.BASE_URL}Sintonia.png`}
+            alt="Sintonía FES Iztacala"
+            className="dashboard-logo"
+            loading="eager"
+            decoding="async"
+          />
+          <div>
+            <span className="tag">Panel administrativo</span>
+            <h1 className="mt-2">Bienvenida, bienvenido</h1>
+            <p className="lede">
+              Como <strong>{ROLE_LABEL[r]}</strong>, accedes a {permissionsDescription(r)}.
+            </p>
+          </div>
         </div>
         <div className="health">
           <ConnChip label="Backend" ok={conn.supabase?.ok} />
           <ConnChip label="BD"      ok={conn.supabase?.ok} />
           <ConnChip label="Pum-AI"  ok={conn.gemini?.ok} />
         </div>
+        <style>{`
+          .dashboard-welcome {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+          }
+          .dashboard-logo {
+            width: 140px;
+            height: auto;
+            flex-shrink: 0;
+            filter: drop-shadow(0 10px 24px rgba(108,80,124,0.18))
+                    drop-shadow(0 4px 10px rgba(108,80,124,0.10));
+            animation: dashLogoFloat 7s ease-in-out infinite;
+            will-change: transform;
+          }
+          @keyframes dashLogoFloat {
+            0%, 100% { transform: translateY(0)   rotate(-0.5deg); }
+            50%      { transform: translateY(-5px) rotate(0.5deg); }
+          }
+          @media (max-width: 720px) {
+            .dashboard-welcome { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .dashboard-logo { width: 110px; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .dashboard-logo { animation: none; }
+          }
+        `}</style>
       </header>
 
       {metrics.loading ? (
