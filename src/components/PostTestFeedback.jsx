@@ -94,7 +94,7 @@ export default function PostTestFeedback({ sessionId }) {
         }
         .feedback-thanks {
           background: var(--c-salvia-100);
-          color: #2F6048;
+          color: #2F8770;
           padding: 14px 18px;
           border-radius: var(--r-md);
           margin-top: 16px;

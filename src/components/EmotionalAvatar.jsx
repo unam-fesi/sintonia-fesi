@@ -209,9 +209,9 @@ export default function EmotionalAvatar({ code }) {
           box-shadow: var(--sh-sm);
         }
         .mood-chip.mood-1 { color: #6E5BA0; border-color: var(--c-lavanda-500); }
-        .mood-chip.mood-2 { color: #4F8A6E; border-color: var(--c-salvia-400); }
+        .mood-chip.mood-2 { color: #4FA88E; border-color: var(--c-salvia-400); }
         .mood-chip.mood-3 { color: #7B5E14; border-color: var(--c-oro-600); }
-        .mood-chip.mood-4 { color: #2F6048; border-color: var(--c-salvia-600); }
+        .mood-chip.mood-4 { color: #2F8770; border-color: var(--c-salvia-600); }
         .mood-chip.mood-5 { color: #93362A; border-color: var(--c-coral-500); }
 
         .avatar-greeting {
@@ -245,7 +245,7 @@ function avatarConfig({ mood, level }) {
     1: { color: '#A98FD9', light: '#D7C7F0', dark: '#6E5BA0' }, // lavanda — bajo
     2: { color: '#9CC4AB', light: '#C9E1D2', dark: '#5A8770' }, // salvia suave — bajo
     3: { color: '#E5C868', light: '#F4E3A8', dark: '#B08F1F' }, // oro — neutro
-    4: { color: '#8FB8A0', light: '#BFD9C8', dark: '#4F8A6E' }, // salvia — bien
+    4: { color: '#8FB8A0', light: '#BFD9C8', dark: '#4FA88E' }, // salvia — bien
     5: { color: '#F0A87A', light: '#FBD3B8', dark: '#D26B53' }, // coral cálido — pleno
   };
   const palette = moodColors[m] || moodColors[3];

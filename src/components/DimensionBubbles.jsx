@@ -10,7 +10,7 @@ const COLORS = {
   estado_emocional:        ['#1A3358', '#10243E'],
   estres_academico:        ['#D26B53', '#B5403E'],
   sueno_descanso:          ['#B7A8D9', '#6E5BA0'],
-  apoyo_social:            ['#8FB8A0', '#4F8A6E'],
+  apoyo_social:            ['#8FB8A0', '#4FA88E'],
   motivacion_pertenencia:  ['#E5C868', '#B08F1F'],
 };
 const DEFAULT_GRADIENT = ['#1A3358', '#10243E'];
@@ -276,7 +276,7 @@ export default function DimensionBubbles({ data = [] }) {
         .bubbles-svg {
           width: 100%;
           height: auto;
-          background: radial-gradient(ellipse at center, #FBF8F1, #ffffff 75%);
+          background: radial-gradient(ellipse at center, #FFFAF5, #ffffff 75%);
           border-radius: var(--r-xl);
           border: 1px solid var(--c-borde);
           user-select: none;

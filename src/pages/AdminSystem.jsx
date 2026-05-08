@@ -98,7 +98,7 @@ function PromptEditor({ ctx }) {
 
       <style>{`
         .feedback { padding: 10px 14px; border-radius: 12px; margin-top: 12px; font-size: 0.92rem; display: inline-block; }
-        .feedback.ok    { background: var(--c-salvia-100); color: #2F6048; }
+        .feedback.ok    { background: var(--c-salvia-100); color: #2F8770; }
         .feedback.error { background: var(--c-coral-100); color: #93362A; }
       `}</style>
     </section>

@@ -11,8 +11,9 @@ body {
   margin: 0;
   font-family: var(--ff-sans);
   color: var(--c-texto);
-  /* Base limpia; el color "vivo" lo aporta WellnessBackground */
-  background: linear-gradient(180deg, #FBF8F1 0%, #F4F0E4 100%);
+  /* Base "Atardecer abrazo": blanco con tinte peach MUY sutil que transiciona
+     a un rosa cremita. Nada de sepia. El color vivo lo aporta WellnessBackground. */
+  background: linear-gradient(180deg, #FFFAF5 0%, #FFF0E8 100%);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -64,9 +65,14 @@ p { margin: 0 0 var(--sp-3); }
   text-transform: uppercase;
   border: 1px solid rgba(201,162,39,0.35);
 }
-.tag.sage  { background: var(--c-salvia-100); color: #2F6048; border-color: rgba(143,184,160,0.45); }
-.tag.coral { background: var(--c-coral-100); color: #93362A; border-color: rgba(232,130,107,0.4); }
-.tag.azul  { background: var(--c-azul-100); color: var(--c-azul-800); border-color: rgba(16,36,62,0.15); }
+.tag.sage     { background: var(--c-mint-100); color: var(--c-mint-700); border-color: rgba(125,196,174,0.45); }
+.tag.mint     { background: var(--c-mint-100); color: var(--c-mint-700); border-color: rgba(125,196,174,0.45); }
+.tag.coral    { background: var(--c-coral-100); color: var(--c-coral-700); border-color: rgba(232,130,107,0.4); }
+.tag.peach    { background: var(--c-peach-100); color: var(--c-peach-700); border-color: rgba(255,154,123,0.4); }
+.tag.rosa     { background: var(--c-rosa-100); color: var(--c-rosa-700); border-color: rgba(232,130,159,0.4); }
+.tag.lavanda  { background: var(--c-lavanda-100); color: var(--c-lavanda-700); border-color: rgba(157,123,217,0.35); }
+.tag.durazno  { background: var(--c-durazno-100); color: var(--c-durazno-700); border-color: rgba(224,172,74,0.4); }
+.tag.azul     { background: var(--c-azul-100); color: var(--c-azul-800); border-color: rgba(16,36,62,0.15); }
 
 /* ===== Botones ===== */
 .btn {
@@ -202,7 +208,7 @@ main { flex: 1; }
 [data-theme="dark"] body {
   background:
     radial-gradient(circle at top right, rgba(201,162,39,0.06), transparent 30%),
-    radial-gradient(circle at top left, rgba(143,184,160,0.06), transparent 28%),
+    radial-gradient(circle at top left, rgba(255,184,156,0.06), transparent 28%),
     linear-gradient(180deg, #0A1929 0%, #0F1A29 100%);
 }
 [data-theme="dark"] h1,
@@ -250,7 +256,7 @@ main { flex: 1; }
 .lvl-moderado    { color: var(--c-nivel-moderado); }
 .lvl-prioritario { color: var(--c-nivel-prioritario); }
 
-.lvl-bg-bajo        { background: var(--c-nivel-bajo-soft); color: #2F6048; }
+.lvl-bg-bajo        { background: var(--c-nivel-bajo-soft); color: #2F8770; }
 .lvl-bg-moderado    { background: var(--c-nivel-moderado-soft); color: #7B5E14; }
 .lvl-bg-prioritario { background: var(--c-nivel-prioritario-soft); color: #93362A; }
 

@@ -211,7 +211,7 @@ function SentBar({ label, pct, color }) {
 
 function AnomalyView({ data }) {
   const status = data.overall_status || 'estable';
-  const statusColor = status === 'alerta' ? '#93362A' : status === 'atender' ? '#7B5E14' : '#2F6048';
+  const statusColor = status === 'alerta' ? '#93362A' : status === 'atender' ? '#7B5E14' : '#2F8770';
   return (
     <div className="mt-2">
       <span style={{padding:'4px 12px',borderRadius:8,background: statusColor,color:'#fff',fontSize:'0.84rem',fontWeight:700,textTransform:'uppercase'}}>

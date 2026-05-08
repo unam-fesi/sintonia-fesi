@@ -18,7 +18,7 @@
   position: absolute;
   bottom: -160px; left: -120px;
   width: 380px; height: 380px;
-  background: radial-gradient(circle, rgba(143,184,160,0.18), transparent 70%);
+  background: radial-gradient(circle, rgba(255,184,156,0.18), transparent 70%);
   border-radius: 50%;
   z-index: 0;
 }
@@ -118,7 +118,7 @@
 
 .orb.azul   { background: linear-gradient(140deg, var(--c-azul-800), var(--c-azul-700)); color: #fff; }
 .orb.oro    { background: linear-gradient(140deg, var(--c-oro-600), var(--c-oro-400)); color: var(--c-azul-800); }
-.orb.salvia { background: linear-gradient(140deg, var(--c-salvia-600), var(--c-salvia-400)); color: #214733; }
+.orb.salvia { background: linear-gradient(140deg, var(--c-salvia-600), var(--c-salvia-400)); color: #2F8770; }
 .orb.coral  { background: linear-gradient(140deg, var(--c-coral-500), var(--c-coral-600)); color: #fff; }
 .orb.lavanda{ background: linear-gradient(140deg, var(--c-lavanda-500), #C9BCE3); color: #3F2F66; }
 .orb.marfil { background: var(--c-marfil); color: var(--c-azul-800); }

@@ -91,7 +91,7 @@ export default function Home() {
         <style>{`
           .continuity-card {
             background: linear-gradient(135deg, var(--c-azul-100), var(--c-salvia-100));
-            border: 1px solid rgba(143,184,160,0.4);
+            border: 1px solid rgba(255,184,156,0.4);
             border-radius: var(--r-xl);
             padding: 32px;
             margin-top: 28px;

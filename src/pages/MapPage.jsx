@@ -14,7 +14,7 @@ const DEFAULT_ZOOM = 14;
 
 const MARKER_COLOR = {
   resource:  '#10243E',
-  tree:      '#4F8A6E',
+  tree:      '#4FA88E',
   event:     '#C9A227',
   clue:      '#D26B53',
 };

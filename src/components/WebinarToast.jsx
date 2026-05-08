@@ -227,7 +227,7 @@ export default function WebinarToast() {
         .rsvped-chip {
           padding: 5px 12px;
           background: var(--c-salvia-100);
-          color: #2F6048;
+          color: #2F8770;
           border-radius: 999px;
           font-size: 0.84rem;
           font-weight: 700;

@@ -1,55 +1,95 @@
 /* =========================================================
    Sintonía UNAM — Variables del sistema de diseño
-   Paleta institucional UNAM (azul marino + dorado) con
-   acentos basados en psicología del color para bienestar.
+   Paleta "Atardecer abrazo": institucional UNAM (azul + oro)
+   con acentos cálidos (lavanda, peach, rosa pastel, durazno)
+   para una sensación juvenil, alegre y reconfortante.
    ========================================================= */
 
 :root {
-  /* --- Identidad UNAM --- */
+  /* --- Identidad UNAM (sin cambios) --- */
   --c-azul-900: #0A1929;        /* Profundidad, foco */
-  --c-azul-800: #10243E;        /* Color principal */
+  --c-azul-800: #10243E;        /* Color principal — botones primarios, headers, footer */
   --c-azul-700: #1A3358;        /* Variante elevada */
   --c-azul-100: #E8EDF4;        /* Fondo suave */
   --c-azul-050: #F4F7FB;        /* Fondo aún más suave */
 
   --c-oro-700: #B08F1F;
-  --c-oro-600: #C9A227;         /* Color de acento */
+  --c-oro-600: #C9A227;         /* Acento institucional — botones gold */
   --c-oro-400: #E5C868;         /* Hover */
   --c-oro-100: #FBF1D2;         /* Fondo de chips */
 
-  /* --- Acentos de bienestar --- */
-  --c-salvia-600: #6FA088;      /* Equilibrio */
-  --c-salvia-400: #8FB8A0;
-  --c-salvia-100: #E6F0EA;
+  /* ===== ACENTOS "ATARDECER ABRAZO" ===== */
 
-  --c-coral-600: #D26B53;       /* Cercanía */
-  --c-coral-500: #E8826B;
-  --c-coral-100: #FBE7E0;
-
-  --c-lavanda-500: #B7A8D9;     /* Calma */
+  /* Lavanda — calma + introspección (dominante) */
+  --c-lavanda-700: #6B5BB8;
+  --c-lavanda-600: #9D7BD9;     /* lila vibrante (acento UI) */
+  --c-lavanda-500: #B7A8D9;     /* base */
+  --c-lavanda-400: #C9BCE5;
   --c-lavanda-100: #EFEBF7;
 
-  /* --- Neutros --- */
-  --c-marfil:    #FBF8F1;
-  --c-blanco:    #FFFFFF;
-  --c-texto:     #1F2A37;
-  --c-texto-soft: #4B5563;
-  --c-gris:      #6B7280;
-  --c-gris-claro:#9CA3AF;
-  --c-borde:     #E5E7EB;
-  --c-borde-soft:#EEF2F7;
+  /* Peach — calidez, cercanía (reemplaza salvia) */
+  --c-peach-700: #C66A48;
+  --c-peach-600: #FF9A7B;       /* acento UI */
+  --c-peach-500: #FFB89C;       /* base / blob */
+  --c-peach-400: #FFCFB8;
+  --c-peach-100: #FFE8DD;       /* fondo de chips */
+
+  /* Rosa pastel — ternura, juventud */
+  --c-rosa-700: #B5526D;
+  --c-rosa-600: #E8829F;
+  --c-rosa-500: #FFC7D8;        /* base / blob */
+  --c-rosa-400: #FFD8E3;
+  --c-rosa-100: #FFEAF1;
+
+  /* Durazno — calidez, alegría (reemplaza el oro como blob) */
+  --c-durazno-700: #C58A2A;
+  --c-durazno-600: #E0AC4A;
+  --c-durazno-500: #FFD89E;     /* base / blob */
+  --c-durazno-400: #FFE5BA;
+  --c-durazno-100: #FFF4DE;
+
+  /* Coral — alerta cariñosa (mantenido para niveles prioritarios) */
+  --c-coral-700: #B0533D;
+  --c-coral-600: #D26B53;
+  --c-coral-500: #E8826B;
+  --c-coral-400: #F0A088;
+  --c-coral-100: #FBE7E0;
+
+  /* Mint — nivel "bienestar bajo" (reemplaza salvia con un tono más vivo) */
+  --c-mint-700: #2F8770;
+  --c-mint-600: #4FA88E;
+  --c-mint-500: #7DC4AE;
+  --c-mint-400: #A8DCC8;
+  --c-mint-100: #DEF1E8;
+
+  /* ===== Aliases retro-compatibles ===== */
+  /* Mantenidos para que el código existente que usa --c-salvia-* siga funcionando.
+     Ahora apuntan a la paleta mint (más viva, sin tono opaco) */
+  --c-salvia-600: var(--c-mint-600);
+  --c-salvia-400: var(--c-mint-500);
+  --c-salvia-100: var(--c-mint-100);
+
+  /* --- Neutros (sin sepia) --- */
+  --c-marfil:     #FFFAF5;       /* blanco con tinte peach MUY sutil */
+  --c-blanco:     #FFFFFF;
+  --c-texto:      #2C2334;       /* texto principal — un toque cálido */
+  --c-texto-soft: #56495C;
+  --c-gris:       #786A7C;
+  --c-gris-claro: #A89AAC;
+  --c-borde:      #EDE5E8;       /* borde con tono cálido */
+  --c-borde-soft: #F5EFF1;
 
   /* --- Estados --- */
-  --c-exito:     #4F8A6E;
-  --c-warning:   #C58F2F;
-  --c-error:     #B5403E;
+  --c-exito:   #4FA88E;          /* mint */
+  --c-warning: #E0AC4A;          /* durazno */
+  --c-error:   #D26B53;          /* coral */
 
   /* --- Niveles de atención (resultado del test) --- */
-  --c-nivel-bajo:        var(--c-salvia-600);
-  --c-nivel-bajo-soft:   var(--c-salvia-100);
-  --c-nivel-moderado:    var(--c-oro-600);
-  --c-nivel-moderado-soft: var(--c-oro-100);
-  --c-nivel-prioritario: var(--c-coral-600);
+  --c-nivel-bajo:           var(--c-mint-600);
+  --c-nivel-bajo-soft:      var(--c-mint-100);
+  --c-nivel-moderado:       var(--c-oro-600);
+  --c-nivel-moderado-soft:  var(--c-oro-100);
+  --c-nivel-prioritario:    var(--c-coral-600);
   --c-nivel-prioritario-soft: var(--c-coral-100);
 
   /* --- Tipografía --- */
@@ -63,9 +103,9 @@
   --r-xl: 28px;
   --r-pill: 999px;
 
-  --sh-sm: 0 4px 12px rgba(16, 36, 62, 0.06);
-  --sh-md: 0 10px 28px rgba(16, 36, 62, 0.10);
-  --sh-lg: 0 20px 48px rgba(16, 36, 62, 0.16);
+  --sh-sm: 0 4px 12px rgba(108, 80, 124, 0.06);
+  --sh-md: 0 10px 28px rgba(108, 80, 124, 0.10);
+  --sh-lg: 0 20px 48px rgba(108, 80, 124, 0.16);
 
   --sp-1: 4px;
   --sp-2: 8px;

@@ -147,7 +147,7 @@ export default function AdminProfile({ ctx, onUpdated }) {
           font-size: 0.92rem;
           display: inline-block;
         }
-        .feedback.ok    { background: var(--c-salvia-100); color: #2F6048; }
+        .feedback.ok    { background: var(--c-salvia-100); color: #2F8770; }
         .feedback.error { background: var(--c-coral-100); color: #93362A; }
         @media (max-width: 880px) {
           .profile-grid { grid-template-columns: 1fr; }

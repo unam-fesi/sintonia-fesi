@@ -24,6 +24,6 @@
 .info-card p  { color: var(--c-texto-soft); margin: 0; font-size: 0.96rem; }
 
 .info-card.accent-oro    .info-icon { background: var(--c-oro-100);   color: #7B5E14; }
-.info-card.accent-salvia .info-icon { background: var(--c-salvia-100);color: #2F6048; }
+.info-card.accent-salvia .info-icon { background: var(--c-salvia-100);color: #2F8770; }
 .info-card.accent-coral  .info-icon { background: var(--c-coral-100); color: #93362A; }
 .info-card.accent-lavanda .info-icon { background: var(--c-lavanda-100); color: #3F2F66; }

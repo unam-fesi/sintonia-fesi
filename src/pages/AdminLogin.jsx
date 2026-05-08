@@ -101,7 +101,7 @@ export default function AdminLogin() {
           padding: 40px 20px;
           background:
             radial-gradient(circle at 30% 20%, rgba(201,162,39,0.18), transparent 50%),
-            radial-gradient(circle at 70% 80%, rgba(143,184,160,0.18), transparent 50%),
+            radial-gradient(circle at 70% 80%, rgba(255,184,156,0.18), transparent 50%),
             linear-gradient(135deg, var(--c-azul-800), #0A1929);
         }
         .login-card {

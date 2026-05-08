@@ -123,7 +123,7 @@ export default function AdminExport({ ctx }) {
         .ds-card code { background: var(--c-azul-100); padding: 2px 6px; border-radius: 6px; font-size: 0.84em; }
         .ds-actions { display: flex; gap: 8px; margin-top: 12px; }
         .feedback { padding: 10px 14px; border-radius: 12px; font-size: 0.92rem; display: inline-block; }
-        .feedback.ok    { background: var(--c-salvia-100); color: #2F6048; }
+        .feedback.ok    { background: var(--c-salvia-100); color: #2F8770; }
         .feedback.error { background: var(--c-coral-100); color: #93362A; }
       `}</style>
     </>

@@ -35,15 +35,15 @@ export default function WellnessBackground() {
 
   return (
     <div ref={bgRef} className="wellness-bg" aria-hidden="true">
-      {/* Wash base que rota muy lento */}
+      {/* Wash base que rota muy lento — paleta "Atardecer abrazo" */}
       <div className="bg-wash" />
 
       {/* Blobs gigantes que se mezclan */}
       <div className="bg-blob bg-blob-lavender" />
-      <div className="bg-blob bg-blob-sage" />
-      <div className="bg-blob bg-blob-gold" />
+      <div className="bg-blob bg-blob-peach" />
+      <div className="bg-blob bg-blob-durazno" />
+      <div className="bg-blob bg-blob-rosa" />
       <div className="bg-blob bg-blob-coral" />
-      <div className="bg-blob bg-blob-blue" />
 
       <style>{`
         .wellness-bg {
@@ -55,20 +55,21 @@ export default function WellnessBackground() {
           will-change: transform;
         }
 
-        /* ===== Wash base (gradiente desplazándose) ===== */
+        /* ===== Wash base — Atardecer abrazo:
+                lavanda → peach → rosa pastel → durazno ===== */
         .bg-wash {
           position: absolute;
           inset: 0;
           background:
             linear-gradient(135deg,
-              rgba(183, 168, 217, 0.55) 0%,
-              rgba(143, 184, 160, 0.45) 30%,
-              rgba(232, 200, 104, 0.40) 60%,
-              rgba(232, 130, 107, 0.35) 100%
+              rgba(183, 168, 217, 0.55) 0%,    /* lavanda */
+              rgba(255, 184, 156, 0.50) 35%,   /* peach */
+              rgba(255, 199, 216, 0.45) 65%,   /* rosa pastel */
+              rgba(255, 216, 158, 0.42) 100%   /* durazno */
             );
           background-size: 250% 250%;
           animation: washShift 32s ease-in-out infinite;
-          opacity: 0.85;
+          opacity: 0.88;
         }
         @keyframes washShift {
           0%   { background-position:   0%   0%; }
@@ -87,6 +88,7 @@ export default function WellnessBackground() {
           will-change: transform;
         }
 
+        /* Lavanda — dominante (calma, introspección) */
         .bg-blob-lavender {
           width: 90vmax; height: 90vmax;
           top: -25vmax; left: -25vmax;
@@ -94,33 +96,37 @@ export default function WellnessBackground() {
           opacity: 0.75;
           animation: drift-1 38s ease-in-out infinite;
         }
-        .bg-blob-sage {
+        /* Peach — calidez, abrazo (reemplaza la salvia) */
+        .bg-blob-peach {
           width: 80vmax; height: 80vmax;
           bottom: -20vmax; right: -15vmax;
-          background: radial-gradient(circle, var(--c-salvia-400) 0%, transparent 55%);
-          opacity: 0.7;
+          background: radial-gradient(circle, var(--c-peach-500) 0%, transparent 58%);
+          opacity: 0.72;
           animation: drift-2 42s ease-in-out infinite;
         }
-        .bg-blob-gold {
+        /* Durazno — alegría dorada (sustituye al oro como blob) */
+        .bg-blob-durazno {
           width: 70vmax; height: 70vmax;
           top: 20vh; right: -15vmax;
-          background: radial-gradient(circle, var(--c-oro-400) 0%, transparent 60%);
-          opacity: 0.55;
+          background: radial-gradient(circle, var(--c-durazno-500) 0%, transparent 60%);
+          opacity: 0.6;
           animation: drift-3 36s ease-in-out infinite;
         }
+        /* Rosa pastel — ternura, juventud (reemplaza al azul) */
+        .bg-blob-rosa {
+          width: 65vmax; height: 65vmax;
+          top: 50vh; left: 30vw;
+          background: radial-gradient(circle, var(--c-rosa-500) 0%, transparent 60%);
+          opacity: 0.55;
+          animation: drift-5 50s ease-in-out infinite;
+        }
+        /* Coral — chispa cálida (mantenido, más sutil) */
         .bg-blob-coral {
           width: 60vmax; height: 60vmax;
           bottom: 10vh; left: -10vmax;
-          background: radial-gradient(circle, var(--c-coral-500) 0%, transparent 60%);
-          opacity: 0.45;
+          background: radial-gradient(circle, var(--c-coral-500) 0%, transparent 62%);
+          opacity: 0.42;
           animation: drift-4 44s ease-in-out infinite;
-        }
-        .bg-blob-blue {
-          width: 65vmax; height: 65vmax;
-          top: 50vh; left: 30vw;
-          background: radial-gradient(circle, var(--c-azul-700) 0%, transparent 60%);
-          opacity: 0.30;
-          animation: drift-5 50s ease-in-out infinite;
         }
 
         @keyframes drift-1 {
@@ -156,7 +162,7 @@ export default function WellnessBackground() {
         /* ===== Mobile: bajamos blur para mejor performance ===== */
         @media (max-width: 720px) {
           .bg-blob { filter: blur(60px); }
-          .bg-blob-blue { display: none; }
+          .bg-blob-rosa  { display: none; }
           .bg-blob-coral { display: none; }
         }
       `}</style>

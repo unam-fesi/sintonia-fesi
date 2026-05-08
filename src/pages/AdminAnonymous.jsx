@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../config/supabaseClient.js';
 
 const MS_DAY = 24 * 3600 * 1000;
-const FACULTY_COLORS = ['#10243E','#C9A227','#8FB8A0','#D26B53','#B7A8D9','#1A3358','#4F8A6E'];
+const FACULTY_COLORS = ['#10243E','#C9A227','#8FB8A0','#D26B53','#B7A8D9','#1A3358','#4FA88E'];
 
 export default function AdminAnonymous({ ctx }) {
   const isFullAdmin = ctx?.admin?.role === 'admin';

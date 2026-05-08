@@ -193,7 +193,7 @@ export default function PumAISuggester({ onUse }) {
           font-size: 0.74rem;
           font-weight: 700;
         }
-        .badge.pos { background: var(--c-salvia-100); color: #2F6048; }
+        .badge.pos { background: var(--c-salvia-100); color: #2F8770; }
         .badge.neg { background: var(--c-coral-100); color: #93362A; }
         @media (max-width: 540px) {
           .form-grid { grid-template-columns: 1fr; }

@@ -180,7 +180,7 @@ export default function Adventure() {
         }
         .found-badge {
           background: var(--c-salvia-100);
-          color: #2F6048;
+          color: #2F8770;
           padding: 14px 18px;
           border-radius: 12px;
           font-weight: 700;

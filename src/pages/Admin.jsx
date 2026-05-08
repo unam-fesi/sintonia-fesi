@@ -415,7 +415,7 @@ function AdminDashboard({ ctx }) {
           font-size: 0.84rem;
           font-weight: 700;
         }
-        .conn-chip.ok      { background: var(--c-salvia-100); color: #2F6048; }
+        .conn-chip.ok      { background: var(--c-salvia-100); color: #2F8770; }
         .conn-chip.fail    { background: var(--c-coral-100); color: #93362A; }
         .conn-chip.unknown { background: var(--c-azul-100); color: var(--c-azul-800); }
 
@@ -812,7 +812,7 @@ function AdminUsers({ ctx }) {
           margin-top: 12px;
           font-size: 0.92rem;
         }
-        .feedback.ok    { background: var(--c-salvia-100); color: #2F6048; }
+        .feedback.ok    { background: var(--c-salvia-100); color: #2F8770; }
         .feedback.error { background: var(--c-coral-100); color: #93362A; }
         .toggle { display: inline-flex; align-items: center; gap: 6px; }
 

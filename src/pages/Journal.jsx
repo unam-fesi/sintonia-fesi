@@ -305,7 +305,7 @@ export default function Journal() {
         .entry-meta small { color: var(--c-gris); font-size: 0.78rem; flex: 1; }
         .emo-tag {
           background: var(--c-salvia-100);
-          color: #2F6048;
+          color: #2F8770;
           padding: 2px 8px;
           border-radius: 999px;
           font-size: 0.76rem;
