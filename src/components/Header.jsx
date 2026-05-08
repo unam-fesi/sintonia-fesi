@@ -8,10 +8,11 @@ export default function Header() {
   const loggedIn = !!student?.code;
   const location = useLocation();
   const [openMenu, setOpenMenu] = useState(null); // 'discover' | 'mine' | 'user' | null
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef(null);
 
   // Cierra menús al cambiar de ruta o click fuera
-  useEffect(() => { setOpenMenu(null); }, [location.pathname]);
+  useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [location.pathname]);
   useEffect(() => {
     function handler(e) {
       if (!navRef.current?.contains(e.target)) setOpenMenu(null);
@@ -20,8 +21,22 @@ export default function Header() {
     return () => document.removeEventListener('click', handler);
   }, []);
 
+  // Bloquear scroll del body cuando hay drawer abierto
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   function toggle(name) {
     setOpenMenu(m => (m === name ? null : name));
+  }
+  function closeMobile() { setMobileOpen(false); }
+  function handleLogout() {
+    setMobileOpen(false);
+    if (confirm('¿Cerrar sesión?\n\nTu código y datos se conservan en Supabase. Solo se borrará tu acceso local — puedes volver con tu código.')) {
+      clearStudent();
+      window.location.assign(import.meta.env.BASE_URL);
+    }
   }
 
   const initials = loggedIn
@@ -44,6 +59,13 @@ export default function Header() {
             <span>Bienestar emocional universitario</span>
           </div>
         </Link>
+
+        <button
+          type="button"
+          className="mobile-toggle"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Abrir menú"
+        >☰</button>
 
         <nav className="nav" aria-label="Navegación principal" ref={navRef}>
           <NavLink to="/" end className="nav-link">Inicio</NavLink>
@@ -152,6 +174,70 @@ export default function Header() {
           )}
         </nav>
       </div>
+
+      {/* ===== Drawer mobile ===== */}
+      {mobileOpen && (
+        <>
+          <div className="mobile-overlay" onClick={closeMobile} />
+          <aside className="mobile-drawer" role="dialog" aria-label="Menú principal">
+            <header>
+              <strong>Menú</strong>
+              <button className="close-x" onClick={closeMobile} aria-label="Cerrar">✕</button>
+            </header>
+
+            {loggedIn && (
+              <div className="m-user">
+                <span className="m-initials">{initials}</span>
+                <div>
+                  <strong>Tu código</strong>
+                  <code>{student.code}</code>
+                </div>
+              </div>
+            )}
+
+            <nav className="m-nav">
+              <NavLink to="/" end onClick={closeMobile}>🏠 Inicio</NavLink>
+
+              <h4>Conocer</h4>
+              <NavLink to="/recursos" onClick={closeMobile}>📌 Recursos</NavLink>
+              <NavLink to="/calendario" onClick={closeMobile}>📅 Calendario</NavLink>
+              <NavLink to="/mapa" onClick={closeMobile}>🗺 Mapa</NavLink>
+              <NavLink to="/emociones" onClick={closeMobile}>📖 Emociones</NavLink>
+
+              <h4>Apoyo</h4>
+              <NavLink to="/apoyo" onClick={closeMobile}>🆘 Apoyo y canalización</NavLink>
+
+              {loggedIn && (
+                <>
+                  <h4>Mi rincón</h4>
+                  <NavLink to="/mi-historia" onClick={closeMobile}>📊 Mi panel</NavLink>
+                  <NavLink to="/check-in" onClick={closeMobile}>📝 Check-in semanal</NavLink>
+                  <NavLink to="/diario" onClick={closeMobile}>📔 Diario</NavLink>
+                  <NavLink to="/ruta" onClick={closeMobile}>🛤 Mi ruta</NavLink>
+                  <NavLink to="/companion" onClick={closeMobile}>🤝 Pum-AI</NavLink>
+                  <NavLink to="/biblioteca" onClick={closeMobile}>📚 Biblioteca</NavLink>
+                  <NavLink to="/aventura" onClick={closeMobile}>🗺 Aventura</NavLink>
+                  <NavLink to="/buddy" onClick={closeMobile}>🫂 Buddy</NavLink>
+                  <NavLink to="/arboles" onClick={closeMobile}>🌳 Mis árboles</NavLink>
+                </>
+              )}
+
+              <h4>Información</h4>
+              <NavLink to="/privacidad" onClick={closeMobile}>🔒 Privacidad</NavLink>
+
+              <div className="m-cta">
+                {loggedIn ? (
+                  <button type="button" className="btn btn-coral" onClick={handleLogout}>↩ Cerrar sesión</button>
+                ) : (
+                  <Link to="/consentimiento" onClick={closeMobile} className="btn btn-primary btn-lg">
+                    Iniciar orientación
+                  </Link>
+                )}
+              </div>
+            </nav>
+          </aside>
+        </>
+      )}
     </header>
   );
 }
