@@ -5,6 +5,7 @@ import { getAdminContext, signOut, can } from '../services/authService.js';
 import { checkSupabaseHealth } from '../services/supabaseService.js';
 import { checkOrientationHealth } from '../services/geminiService.js';
 import DimensionBubbles from '../components/DimensionBubbles.jsx';
+import AdminProfile from './AdminProfile.jsx';
 
 const ROLE_LABEL = {
   admin: 'Administrador',
@@ -43,12 +44,18 @@ export default function Admin() {
 
   if (!ctx) return null;
 
+  async function refreshCtx() {
+    const c = await getAdminContext().catch(() => null);
+    if (c) setCtx(c);
+  }
+
   return (
     <div className="admin-shell">
       <AdminSidebar ctx={ctx} />
       <main className="admin-main">
         <Routes>
           <Route index element={<AdminDashboard ctx={ctx} />} />
+          <Route path="perfil" element={<AdminProfile ctx={ctx} onUpdated={refreshCtx} />} />
           {can(ctx.admin.role, 'manage_users') && (
             <Route path="usuarios" element={<AdminUsers ctx={ctx} />} />
           )}
@@ -71,17 +78,73 @@ export default function Admin() {
         }
         .admin-side .role-chip {
           display: inline-block;
-          padding: 4px 10px;
+          padding: 3px 8px;
           background: var(--c-oro-600);
           color: var(--c-azul-800);
           border-radius: 999px;
-          font-size: 0.74rem;
+          font-size: 0.66rem;
           font-weight: 800;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
           text-transform: uppercase;
         }
-        .admin-side h3 { color: #fff; margin: 0 0 4px; font-size: 1.05rem; }
-        .admin-side .email { font-size: 0.84rem; color: rgba(255,255,255,0.7); margin: 0 0 18px; word-break: break-all; }
+        .profile-link {
+          display: grid;
+          grid-template-columns: 42px 1fr 22px;
+          gap: 10px;
+          align-items: center;
+          padding: 10px;
+          margin-bottom: 18px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.08);
+          color: #fff !important;
+          transition: background 0.2s;
+        }
+        .profile-link:hover { background: rgba(255,255,255,0.12); }
+        .profile-link .avatar {
+          width: 42px; height: 42px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, var(--c-oro-600), var(--c-oro-400));
+          color: var(--c-azul-800);
+          font-family: var(--ff-serif);
+          font-weight: 800;
+          font-size: 1.1rem;
+          display: grid; place-items: center;
+        }
+        .profile-link .profile-meta {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+        }
+        .profile-link .profile-meta strong {
+          font-size: 0.92rem;
+          color: #fff;
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .profile-link .profile-meta small {
+          font-size: 0.74rem;
+          color: rgba(255,255,255,0.65);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .profile-link .edit-icon {
+          opacity: 0.6;
+          font-size: 1.1rem;
+        }
+        .profile-link.active {
+          background: var(--c-oro-600);
+          color: var(--c-azul-800) !important;
+        }
+        .profile-link.active .profile-meta strong,
+        .profile-link.active .profile-meta small { color: var(--c-azul-800); }
+        .profile-link.active .avatar {
+          background: var(--c-azul-800);
+          color: var(--c-oro-400);
+        }
         .admin-nav { display: grid; gap: 4px; }
         .admin-nav a {
           padding: 10px 14px;
@@ -118,16 +181,31 @@ export default function Admin() {
 
 function AdminSidebar({ ctx }) {
   const r = ctx.admin.role;
+  const initials = (ctx.admin.full_name || ctx.admin.email)
+    .split(/\s+|@|\./)
+    .filter(Boolean)
+    .map(p => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <aside className="admin-side">
-      <span className="role-chip">{ROLE_LABEL[r] || r}</span>
-      <h3>{ctx.admin.full_name || ctx.admin.email}</h3>
-      <p className="email">{ctx.admin.email}</p>
+      <NavLink to="perfil" className="profile-link" title="Editar mi perfil">
+        <span className="avatar" aria-hidden="true">{initials}</span>
+        <div className="profile-meta">
+          <span className="role-chip">{ROLE_LABEL[r] || r}</span>
+          <strong>{ctx.admin.full_name || ctx.admin.email}</strong>
+          <small>{ctx.admin.email}</small>
+        </div>
+        <span className="edit-icon" aria-hidden="true">⚙</span>
+      </NavLink>
 
       <nav className="admin-nav">
         <NavLink to="" end>📊 Dashboard</NavLink>
         {can(r, 'view_detail') && <NavLink to="sesiones">🔍 Sesiones detalladas</NavLink>}
         {can(r, 'manage_users') && <NavLink to="usuarios">👥 Usuarios admin</NavLink>}
+        <NavLink to="perfil">👤 Mi perfil</NavLink>
       </nav>
 
       <button className="logout" onClick={async () => {
