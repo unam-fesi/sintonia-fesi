@@ -104,46 +104,46 @@ export default function Header() {
           <NavLink to="/privacidad" className="nav-link nav-tiny">Privacidad</NavLink>
 
           {loggedIn ? (
-            <div className="user-area">
-              <Link
-                to="/mi-historia"
-                className="user-chip"
-                title="Ir a mi panel"
+            <div className="dropdown">
+              <button
+                type="button"
+                className={`user-chip ${openMenu === 'user' ? 'active' : ''}`}
+                onClick={() => toggle('user')}
+                aria-haspopup="true"
+                aria-expanded={openMenu === 'user'}
+                title="Abrir menú"
               >
                 <span className="initials">{initials}</span>
                 <small>{student.code}</small>
-              </Link>
-              <div className="dropdown">
-                <button
-                  type="button"
-                  className={`user-menu-btn ${openMenu === 'user' ? 'active' : ''}`}
-                  onClick={() => toggle('user')}
-                  aria-haspopup="true"
-                  aria-expanded={openMenu === 'user'}
-                  aria-label="Menú de usuario"
-                >▾</button>
-                {openMenu === 'user' && (
-                  <div className="drop-panel">
-                    <NavLink to="/mi-historia" end>📊 Mi panel</NavLink>
-                    <NavLink to="/check-in">📝 Check-in</NavLink>
-                    <NavLink to="/diario">📔 Diario</NavLink>
-                    <NavLink to="/ruta">🛤 Mi ruta</NavLink>
-                    <hr style={{margin:'4px 0', border:0, borderTop:'1px solid var(--c-borde-soft)'}} />
-                    <button
-                      type="button"
-                      className="logout-link"
-                      onClick={() => {
-                        if (confirm('¿Cerrar sesión?\n\nTu código y datos se conservan en Supabase. Solo se borrará tu acceso local — puedes volver con tu código.')) {
-                          clearStudent();
-                          window.location.assign(import.meta.env.BASE_URL);
-                        }
-                      }}
-                    >
-                      ↩ Cerrar sesión
-                    </button>
-                  </div>
-                )}
-              </div>
+                <span className="chev" aria-hidden="true">▾</span>
+              </button>
+              {openMenu === 'user' && (
+                <div className="drop-panel user-drop">
+                  <NavLink to="/mi-historia" end>📊 Mi panel</NavLink>
+                  <NavLink to="/check-in">📝 Check-in semanal</NavLink>
+                  <NavLink to="/diario">📔 Diario emocional</NavLink>
+                  <NavLink to="/ruta">🛤 Mi ruta</NavLink>
+                  <NavLink to="/companion">🤝 Pum-AI</NavLink>
+                  <NavLink to="/biblioteca">📚 Biblioteca</NavLink>
+                  <NavLink to="/aventura">🗺 Aventura</NavLink>
+                  <NavLink to="/buddy">🫂 Buddy</NavLink>
+                  <NavLink to="/arboles">🌳 Mis árboles</NavLink>
+                  <hr style={{margin:'6px 0', border:0, borderTop:'1px solid var(--c-borde-soft)'}} />
+                  <button
+                    type="button"
+                    className="logout-link"
+                    onClick={() => {
+                      setOpenMenu(null);
+                      if (confirm('¿Cerrar sesión?\n\nTu código y datos se conservan en Supabase. Solo se borrará tu acceso local — puedes volver con tu código.')) {
+                        clearStudent();
+                        window.location.assign(import.meta.env.BASE_URL);
+                      }
+                    }}
+                  >
+                    ↩ Cerrar sesión
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <Link to="/consentimiento" className="btn btn-primary btn-sm nav-cta">

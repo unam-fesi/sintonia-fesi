@@ -64,6 +64,8 @@ export default function Journal() {
 
   async function requestSuggestion(entry, emotion_tag) {
     setSuggestLoading(true); setSuggestion(null);
+    let usedFallback = false;
+
     try {
       const { data, error } = await supabase.functions.invoke('journal-suggest', {
         body: {
@@ -72,23 +74,56 @@ export default function Journal() {
           emotion_tag,
         },
       });
-      if (error || !data) { setSuggestLoading(false); return; }
-      if (data.error) { setSuggestLoading(false); return; }
-      if (data.crisis) {
-        setSuggestion({ kind: 'crisis', message: data.message });
-      } else if (data.suggestion) {
-        setSuggestion({
-          kind: 'resource',
-          item: data.suggestion,
-          reason: data.reason,
-          fallback: !!data.fallback,
-        });
+
+      // Caso éxito
+      if (!error && data && !data.error) {
+        if (data.crisis) {
+          setSuggestion({ kind: 'crisis', message: data.message });
+        } else if (data.suggestion) {
+          setSuggestion({
+            kind: 'resource',
+            item: data.suggestion,
+            reason: data.reason,
+            fallback: !!data.fallback,
+          });
+        } else {
+          // No hubo sugerencia pero tampoco error — mostrar fallback local
+          usedFallback = true;
+        }
+      } else {
+        usedFallback = true;
+        if (error || data?.error) {
+          console.warn('[journal-suggest] error', error || data.error);
+        }
       }
     } catch (e) {
-      console.warn(e);
-    } finally {
-      setSuggestLoading(false);
+      console.warn('[journal-suggest] exception', e);
+      usedFallback = true;
     }
+
+    // Fallback local: si la edge function no respondió o falló, intentar
+    // armar una sugerencia client-side desde la biblioteca pública
+    if (usedFallback) {
+      try {
+        const cats = pickCategoriesFor(emotion_tag);
+        const { data: lib } = await supabase.from('student_library')
+          .select('id, category, title, body, media_url, duration_sec, meta')
+          .eq('active', true)
+          .in('category', cats)
+          .limit(40);
+        if (lib && lib.length > 0) {
+          const item = lib[Math.floor(Math.random() * lib.length)];
+          setSuggestion({
+            kind: 'resource',
+            item,
+            reason: localReasonFor(emotion_tag),
+            fallback: true,
+          });
+        }
+      } catch (e) { console.warn(e); }
+    }
+
+    setSuggestLoading(false);
   }
 
   async function remove(id) {
@@ -275,6 +310,25 @@ export default function Journal() {
       `}</style>
     </section>
   );
+}
+
+function pickCategoriesFor(emotion) {
+  const e = (emotion || '').toLowerCase();
+  if (/triste|cansancio|apat|soledad/.test(e))     return ['sound','breathing','quote'];
+  if (/ansie|nerv|estr|enojo|conf/.test(e))         return ['breathing','sound'];
+  if (/calma|gratitud|esperanza|aleg/.test(e))      return ['challenge','quote','sound'];
+  return ['sound','breathing','quote','challenge'];
+}
+
+function localReasonFor(emotion) {
+  const e = (emotion || '').toLowerCase();
+  if (/triste|cansancio|apat|soledad/.test(e))
+    return 'Para acompañarte en este momento sin presión. Solo escucha.';
+  if (/ansie|nerv|estr/.test(e))
+    return 'Esto puede ayudarte a regular el ritmo y soltar un poco la tensión.';
+  if (/calma|gratitud|esperanza|aleg/.test(e))
+    return '¡Ese estado es valioso! Aprovéchalo con un pequeño reto.';
+  return 'Quizás esto resuena con cómo te sientes hoy.';
 }
 
 function SuggestionCard({ item, reason, onDismiss }) {
