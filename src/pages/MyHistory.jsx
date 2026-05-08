@@ -5,6 +5,23 @@ import SafetyNotice from '../components/SafetyNotice.jsx';
 import EmotionalAvatar from '../components/EmotionalAvatar.jsx';
 import { setStudent, clearStudent, getStudent } from '../hooks/useStudent.js';
 
+// Extrae el mensaje de error real cuando una Edge Function devuelve non-2xx.
+// supabase-js v2 envuelve esto en FunctionsHttpError sin exponer el body.
+async function extractFnError(error) {
+  try {
+    if (error?.context && typeof error.context.json === 'function') {
+      const body = await error.context.json();
+      if (body?.detail) return `${body.error || 'Error'} — ${body.detail}`;
+      if (body?.error)  return body.error;
+    }
+    if (error?.context && typeof error.context.text === 'function') {
+      const txt = await error.context.text();
+      if (txt) return txt.slice(0, 280);
+    }
+  } catch (_) { /* ignore */ }
+  return error?.message || null;
+}
+
 export default function MyHistory() {
   const existing = getStudent();
   const [step, setStep] = useState(existing?.code ? 'loading' : 'login');
@@ -41,19 +58,26 @@ export default function MyHistory() {
       const { data: r, error } = await supabase.functions.invoke('anon-auth', {
         body: { action: 'login', anonymous_code: code, password },
       });
-      if (error) throw error;
-      if (r?.error) throw new Error(r.error);
+      if (error) {
+        const detail = await extractFnError(error);
+        throw new Error(detail || 'Edge Function falló');
+      }
+      if (r?.error) throw new Error(r.detail ? `${r.error} — ${r.detail}` : r.error);
 
       const { data: hist, error: hErr } = await supabase.functions.invoke('anon-auth', {
         body: { action: 'history', anonymous_code: code, password },
       });
-      if (hErr) throw hErr;
-      if (hist?.error) throw new Error(hist.error);
+      if (hErr) {
+        const detail = await extractFnError(hErr);
+        throw new Error(detail || 'Edge Function falló');
+      }
+      if (hist?.error) throw new Error(hist.detail ? `${hist.error} — ${hist.detail}` : hist.error);
 
       setData(hist);
       setStudent({ code, password: password || null });
       setStep('history');
     } catch (e) {
+      console.error('[login] error completo:', e);
       setErr(e.message || 'Error de inicio de sesión');
     } finally {
       setLoading(false);
@@ -67,14 +91,19 @@ export default function MyHistory() {
       const { data: r, error } = await supabase.functions.invoke('anon-auth', {
         body: { action: 'register', anonymous_code: codeNew, password, faculty },
       });
-      if (error) throw error;
-      if (r?.error) throw new Error(r.error);
+      if (error) {
+        // El SDK no incluye el body del error — lo extraemos manualmente
+        const detail = await extractFnError(error);
+        throw new Error(detail || error.message || 'Edge Function falló');
+      }
+      if (r?.error) throw new Error(r.detail ? `${r.error} — ${r.detail}` : r.error);
 
       setCode(codeNew);
       setStudent({ code: codeNew, password: password || null });
       setData({ created: codeNew });
       setStep('registered');
     } catch (e) {
+      console.error('[register] error completo:', e);
       setErr(e.message || 'No pudimos crear tu cuenta');
     } finally {
       setLoading(false);
